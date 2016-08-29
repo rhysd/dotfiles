@@ -28,6 +28,9 @@ func NewRepository(spec, path string) (*Repository, error) {
 			return nil, fmt.Errorf("'%s' is not a directory", path)
 		}
 	}
+	if spec == "" {
+		return nil, fmt.Errorf("Remote path to clone must not be empty")
+	}
 	if strings.HasPrefix(spec, "https://") {
 		if !strings.HasSuffix(spec, ".git") {
 			spec = spec + ".git"
