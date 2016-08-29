@@ -109,7 +109,7 @@ func TestClone(t *testing.T) {
 	}
 
 	{
-		r, _ := NewRepository("git@bitbucket.com:rhysd/dotfiles", "_test_cloned")
+		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned")
 		if err := r.Clone(); err != nil {
 			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
 		}
