@@ -37,7 +37,7 @@ func TestNewRepositoryInvalidPath(t *testing.T) {
 }
 
 func TestNewRepositoryValidPath(t *testing.T) {
-	if err := os.MkdirAll("_test_directory", os.ModeDir); err != nil {
+	if err := os.MkdirAll("_test_directory", os.ModeDir|os.ModePerm); err != nil {
 		panic(err.Error())
 	}
 	defer os.Remove("_test_directory")
@@ -83,5 +83,43 @@ func TestNewRepositoryInvalidEmptySpec(t *testing.T) {
 	_, err := NewRepository("", "")
 	if err == nil {
 		t.Errorf("Expected an error when empty spec was provided")
+	}
+}
+
+func TestClone(t *testing.T) {
+	if err := os.MkdirAll("_test_cloned", os.ModeDir|os.ModePerm); err != nil {
+		panic(err.Error())
+	}
+	defer os.RemoveAll("_test_cloned")
+
+	{
+		r, _ := NewRepository("rhysd/vim-rustpeg", "")
+		if err := r.Clone(); err != nil {
+			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
+		}
+		defer os.RemoveAll("vim-rustpeg")
+		p := path.Join(getwd(), "vim-rustpeg") // Just a test repository
+		s, err := os.Stat(p)
+		if err != nil {
+			t.Fatalf("Cloned repository not found")
+		}
+		if !s.IsDir() {
+			t.Fatalf("Cloned repository is not a directory")
+		}
+	}
+
+	{
+		r, _ := NewRepository("git@bitbucket.com:rhysd/dotfiles", "_test_cloned")
+		if err := r.Clone(); err != nil {
+			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
+		}
+		p := path.Join(getwd(), "_test_cloned", "dotfiles") // Just a test repository
+		s, err := os.Stat(p)
+		if err != nil {
+			t.Fatalf("Cloned repository not found")
+		}
+		if !s.IsDir() {
+			t.Fatalf("Cloned repository is not a directory")
+		}
 	}
 }

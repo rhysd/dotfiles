@@ -1,5 +1,5 @@
 def run_test(file)
-  system "go test ./#{file} #{Dir['./dotfiles-command/*.go'].reject{|p| p.end_with? '_test.go'}.join(' ')}"
+  system "go test -v ./#{file} #{Dir['./dotfiles-command/*.go'].reject{|p| p.end_with? '_test.go'}.join(' ')}"
 end
 
 guard :shell do

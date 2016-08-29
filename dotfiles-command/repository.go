@@ -20,11 +20,11 @@ func NewRepository(spec, path string) (*Repository, error) {
 			return nil, err
 		}
 	} else {
-		stat, err := os.Stat(path)
+		s, err := os.Stat(path)
 		if err != nil {
 			return nil, err
 		}
-		if !stat.IsDir() {
+		if !s.IsDir() {
 			return nil, fmt.Errorf("'%s' is not a directory", path)
 		}
 	}
@@ -53,11 +53,13 @@ func (repo *Repository) Clone() error {
 		return err
 	}
 
-	err = os.Chdir(repo.ParentDir)
-	if err != nil {
-		return err
+	if repo.ParentDir != cwd {
+		err = os.Chdir(repo.ParentDir)
+		if err != nil {
+			return err
+		}
+		defer os.Chdir(cwd)
 	}
-	defer os.Chdir(cwd)
 
 	cmd := exec.Command("git", "clone", repo.Url)
 	cmd.Stdout = os.Stdout
