@@ -12,10 +12,18 @@ This command has below goals:
 - **Less dependency**: Only depends on `git` command.
 - **Sensible defaults**: Many sensible default symbolic link mappings are pre-defined.  You need not to specify the mappings for almost all configuration files.
 
+Note: My dotfiles is [here](https://github.com/rhysd/dogfiles)
 
-## Installation
 
-TODO
+## Getting Started
+
+1. Download [a released executable](https://github.com/rhysd/dotfiles/releases) and put it in `$PATH` or `$ go get github.com/rhysd/dotfiles`.
+2. Change current directory to the directory you want to put a dotfiles repository.
+3. Clone your dotfiles repository with `$ dotfiles clone`.
+4. Enter the repository and run `$ dotfiles link --dry` to check which symlinks will be generated.
+5. Write `.dotfiles/mappings.json` if needed.
+6. `$ dotfiles link`
+7. After you no longer need your configuration, remove all links with `$ dotfiles clean`.
 
 
 ## Usage
