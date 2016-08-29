@@ -26,21 +26,34 @@ var (
 	version = app.Command("version", "Show version")
 )
 
+func unimplemented(cmd string) {
+	fmt.Fprintf(os.Stderr, "Command '%s' is not implemented yet!\n", cmd)
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		os.Exit(1)
+	} else {
+		os.Exit(0)
+	}
+}
+
 func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case clone.FullCommand():
-		fmt.Printf("clone: %s %v '%s'\n", clone.FullCommand(), *clone_repo, *clone_path)
+		handleError(dotfiles.Clone(*clone_repo, *clone_path))
 	case link.FullCommand():
-		fmt.Printf("link: %s %v\n", link.FullCommand(), *link_dryrun)
+		unimplemented("link")
 	case list.FullCommand():
-		fmt.Printf("list: %s\n", list.FullCommand())
+		unimplemented("list")
 	case clean.FullCommand():
-		fmt.Printf("clean: %s\n", clean.FullCommand())
+		unimplemented("clean")
 	case update.FullCommand():
-		fmt.Printf("update: %s\n", update.FullCommand())
+		unimplemented("update")
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
 	default:
-		fmt.Printf("unknown\n")
+		panic("Internal error: Unreachable! Please report this to https://github.com/rhysd/dotfiles-command/issues")
 	}
 }
