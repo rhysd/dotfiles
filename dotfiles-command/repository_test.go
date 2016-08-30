@@ -29,7 +29,7 @@ func TestNewRepositoryInvalidPath(t *testing.T) {
 	}
 
 	for _, i := range error_cases {
-		_, err = NewRepository("foo", i)
+		_, err = NewRepository("foo", i, false)
 		if err == nil {
 			t.Errorf("Error was expected with invalid input to <path>:%s", i)
 		}
@@ -49,7 +49,7 @@ func TestNewRepositoryValidPath(t *testing.T) {
 	}
 
 	for input, expected := range success_cases {
-		r, err := NewRepository("foo", input)
+		r, err := NewRepository("foo", input, false)
 		if err != nil {
 			t.Errorf("Unexpected error on specifying path: %s", err.Error())
 		} else if r.ParentDir != expected {
@@ -69,7 +69,26 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 	}
 
 	for input, expected := range success_cases {
-		r, err := NewRepository(input, "")
+		r, err := NewRepository(input, "", false)
+		if err != nil {
+			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())
+		}
+		if r.Url != expected {
+			t.Errorf("Expected %s for input %s, but actually %s", expected, input, r.Url)
+		}
+	}
+}
+
+func TestNewRepositoryWithHttps(t *testing.T) {
+	success_cases := map[string]string{
+		"rhysd":                                 "https://github.com/rhysd/dotfiles.git",
+		"rhysd/foobar":                          "https://github.com/rhysd/foobar.git",
+		"https://github.com/rhysd/dogfiles.git": "https://github.com/rhysd/dogfiles.git",
+		"git@bitbucket.com:rhysd/dotfiles.git":  "git@bitbucket.com:rhysd/dotfiles.git",
+	}
+
+	for input, expected := range success_cases {
+		r, err := NewRepository(input, "", true)
 		if err != nil {
 			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())
 		}
@@ -80,7 +99,7 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 }
 
 func TestNewRepositoryInvalidEmptySpec(t *testing.T) {
-	_, err := NewRepository("", "")
+	_, err := NewRepository("", "", false)
 	if err == nil {
 		t.Errorf("Expected an error when empty spec was provided")
 	}
@@ -93,7 +112,7 @@ func TestClone(t *testing.T) {
 	defer os.RemoveAll("_test_cloned")
 
 	{
-		r, _ := NewRepository("rhysd/vim-rustpeg", "")
+		r, _ := NewRepository("rhysd/vim-rustpeg", "", false)
 		if err := r.Clone(); err != nil {
 			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
 		}
@@ -109,7 +128,7 @@ func TestClone(t *testing.T) {
 	}
 
 	{
-		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned")
+		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned", false)
 		if err := r.Clone(); err != nil {
 			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
 		}

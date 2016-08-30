@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func Clone(spec, path string) error {
-	repo, err := NewRepository(spec, path)
+func Clone(spec, path string, https bool) error {
+	repo, err := NewRepository(spec, path, https)
 	if err != nil {
 		return err
 	}

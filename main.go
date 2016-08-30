@@ -10,9 +10,10 @@ import (
 var (
 	app = kingpin.New("dotfiles", "A dotfiles manager")
 
-	clone      = app.Command("clone", "Clone remote repository")
-	clone_repo = clone.Arg("repository", "Repository.  Format: 'user', 'user/repo-name', 'git@somewhere.com:repo.git, 'https://somewhere.com/repo.git'").Required().String()
-	clone_path = clone.Arg("path", "Path where repository cloned").String()
+	clone       = app.Command("clone", "Clone remote repository")
+	clone_repo  = clone.Arg("repository", "Repository.  Format: 'user', 'user/repo-name', 'git@somewhere.com:repo.git, 'https://somewhere.com/repo.git'").Required().String()
+	clone_path  = clone.Arg("path", "Path where repository cloned").String()
+	clone_https = clone.Flag("https", "Use https:// instead of git@ protocol for `git clone`.").Short('h').Bool()
 
 	link        = app.Command("link", "Put symlinks to setup your configurations")
 	link_dryrun = link.Flag("dry", "Show what happens only").Bool()
@@ -42,7 +43,7 @@ func handleError(err error) {
 func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case clone.FullCommand():
-		handleError(dotfiles.Clone(*clone_repo, *clone_path))
+		handleError(dotfiles.Clone(*clone_repo, *clone_path, *clone_https))
 	case link.FullCommand():
 		unimplemented("link")
 	case list.FullCommand():

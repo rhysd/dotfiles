@@ -13,7 +13,7 @@ type Repository struct {
 	ParentDir string
 }
 
-func NewRepository(spec, path string) (*Repository, error) {
+func NewRepository(spec, path string, https bool) (*Repository, error) {
 	if path == "" {
 		var err error
 		if path, err = os.Getwd(); err != nil {
@@ -40,9 +40,17 @@ func NewRepository(spec, path string) (*Repository, error) {
 			spec = spec + ".git"
 		}
 	} else if strings.ContainsRune(spec, '/') {
-		spec = fmt.Sprintf("git@github.com:%s.git", spec)
+		if https {
+			spec = fmt.Sprintf("https://github.com/%s.git", spec)
+		} else {
+			spec = fmt.Sprintf("git@github.com:%s.git", spec)
+		}
 	} else {
-		spec = fmt.Sprintf("git@github.com:%s/dotfiles.git", spec)
+		if https {
+			spec = fmt.Sprintf("https://github.com/%s/dotfiles.git", spec)
+		} else {
+			spec = fmt.Sprintf("git@github.com:%s/dotfiles.git", spec)
+		}
 	}
 	return &Repository{spec, path}, nil
 }

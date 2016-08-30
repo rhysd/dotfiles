@@ -40,6 +40,9 @@ Clone your dotfiles repository from remote.
 # Clone git@github.com:rhysd/dotfiles.git into current directory
 $ dotfiles clone rhysd
 
+# Clone https://github.com/rhysd/dotfiles.git into current directory
+$ dotfiles clone rhysd --https
+
 # You can explicitly specify the repository name
 $ dotfiles clone rhysd/dogfiles
 
@@ -53,10 +56,12 @@ $ dotfiles clone https://your.site.com/dotfiles.git
 Set symbolic links to put your configuration files into proper places.
 
 ```sh
-$ dotfiles link [options]
+$ dotfiles link [options] [files...]
 ```
 
 You can dry-run this command with `--dry` option.
+
+If some `files` in dotfiles repository are specified, only they will be linked.
 
 ### `list` subcommand
 

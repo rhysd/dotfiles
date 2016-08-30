@@ -6,7 +6,7 @@ import (
 )
 
 func TestCloneCommand(t *testing.T) {
-	if err := Clone("rhysd/vim-rustpeg", ""); err != nil {
+	if err := Clone("rhysd/vim-rustpeg", "", true); err != nil {
 		t.Fatalf("Unexpected error on cloning: %s", err.Error())
 	}
 	defer os.RemoveAll("vim-rustpeg")
