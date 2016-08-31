@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/rhysd/dotfiles/dotfiles-command"
+	"github.com/rhysd/dotfiles/src"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
@@ -55,6 +55,6 @@ func main() {
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
 	default:
-		panic("Internal error: Unreachable! Please report this to https://github.com/rhysd/dotfiles-command/issues")
+		panic("Internal error: Unreachable! Please report this to https://github.com/rhysd/dotfiles/issues")
 	}
 }

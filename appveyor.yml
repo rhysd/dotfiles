@@ -1,6 +1,6 @@
 version: "{build}"
 clone_depth: 1
-clone_folder: c:\gopath\src\github.com\rhysd\dotfiles-command
+clone_folder: c:\gopath\src\github.com\rhysd\dotfiles
 environment:
     GOPATH: c:\gopath
 install:
@@ -11,5 +11,5 @@ install:
     - go get -v -t -d ./...
 build: off
 test_script:
-    - go test -v ./dotfiles-command/
+    - go test -v ./src/
 deploy: off
