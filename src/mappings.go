@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"runtime"
 )
@@ -146,15 +147,79 @@ func GetMappingsForPlatform(platform, parent string) (Mappings, error) {
 		return nil, err
 	}
 
-	// TODO:
-	// Normalize path (e.g. ~/.foo -> /path/to/home/.foo)
-
-	// TODO:
-	// Validate mappings: linked path must be absolute
-
 	return m, nil
 }
 
 func GetMappings(config_dir string) (Mappings, error) {
 	return GetMappingsForPlatform(runtime.GOOS, config_dir)
+}
+
+func fileExists(file string) bool {
+	s, err := os.Stat(file)
+	return err == nil && !s.IsDir()
+}
+
+func link(from string, to AbsolutePath, dry bool) error {
+	if to.IsEmpty() {
+		// Note: Ignore if dist is specified 'null' in JSON
+		return nil
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	p := path.Join(cwd, from)
+	if _, err := os.Stat(p); err != nil {
+		if from[0] != '.' {
+			return fmt.Errorf("'%s' does not exist. Please check the file in your dotfiles.")
+		}
+
+		p = path.Join(cwd, from[1:]) // Note: Omit '.'
+		if _, err := os.Stat(p); err != nil {
+			return fmt.Errorf("Both '%s' and '%s' don't exist.  Please check the file in your dotfiles", from, from[1:])
+		}
+	}
+
+	if _, err := os.Stat(string(to)); err != nil {
+		fmt.Printf("'%s' already exists.  Skipped.", to)
+		return nil
+	}
+
+	if err := os.MkdirAll(path.Dir(string(to)), os.ModeDir|0644); err != nil {
+		return err
+	}
+
+	fmt.Printf("Link: '%s' -> '%s'\n", from, to)
+
+	if dry {
+		return nil
+	}
+
+	if err := os.Symlink(from, string(to)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (mappings Mappings) CreateAllLinks(dry bool) error {
+	for from, to := range mappings {
+		if err := link(from, to, dry); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
+	for _, from := range specified {
+		if to, ok := mappings[from]; ok {
+			if err := link(from, to, dry); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

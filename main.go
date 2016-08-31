@@ -8,23 +8,25 @@ import (
 )
 
 var (
-	app = kingpin.New("dotfiles", "A dotfiles manager")
+	cli = kingpin.New("dotfiles", "A dotfiles manager")
 
-	clone       = app.Command("clone", "Clone remote repository")
+	clone       = cli.Command("clone", "Clone remote repository")
 	clone_repo  = clone.Arg("repository", "Repository.  Format: 'user', 'user/repo-name', 'git@somewhere.com:repo.git, 'https://somewhere.com/repo.git'").Required().String()
 	clone_path  = clone.Arg("path", "Path where repository cloned").String()
 	clone_https = clone.Flag("https", "Use https:// instead of git@ protocol for `git clone`.").Short('h').Bool()
 
-	link        = app.Command("link", "Put symlinks to setup your configurations")
-	link_dryrun = link.Flag("dry", "Show what happens only").Bool()
+	link           = cli.Command("link", "Put symlinks to setup your configurations")
+	link_dryrun    = link.Flag("dry", "Show what happens only").Bool()
+	link_specified = link.Arg("files", "Files to link. If you specify no file, all will be linked.").Strings()
+	// TODO link_no_default = link.Flag("no-default", "Link files specified by mappings.json and mappings_*.json")
 
-	list = app.Command("list", "Show a list of symbolic link put by this command")
+	list = cli.Command("list", "Show a list of symbolic link put by this command")
 
-	clean = app.Command("clean", "Remove all symbolic links put by this command")
+	clean = cli.Command("clean", "Remove all symbolic links put by this command")
 
-	update = app.Command("update", "Update your dotfiles repository")
+	update = cli.Command("update", "Update your dotfiles repository")
 
-	version = app.Command("version", "Show version")
+	version = cli.Command("version", "Show version")
 )
 
 func unimplemented(cmd string) {
@@ -41,11 +43,11 @@ func handleError(err error) {
 }
 
 func main() {
-	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
+	switch kingpin.MustParse(cli.Parse(os.Args[1:])) {
 	case clone.FullCommand():
 		handleError(dotfiles.Clone(*clone_repo, *clone_path, *clone_https))
 	case link.FullCommand():
-		unimplemented("link")
+		handleError(dotfiles.Link(*link_specified, *link_dryrun))
 	case list.FullCommand():
 		unimplemented("list")
 	case clean.FullCommand():
