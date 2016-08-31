@@ -8,15 +8,16 @@ import (
 	"runtime"
 )
 
-type Mappings map[string]string
+type Mappings map[string]AbsolutePath
+type MappingsJson map[string]string
 
-var DefaultMappings = map[string]Mappings{
-	"windows": Mappings{
+var DefaultMappings = map[string]MappingsJson{
+	"windows": MappingsJson{
 		".gvimrc": "~/vimfiles/gvimrc",
 		".vim":    "~/vimfiles",
 		".vimrc":  "~/vimfiles/vimrc",
 	},
-	"linux": Mappings{
+	"linux": MappingsJson{
 		".Xmodmap":       "~/.Xmodmap",
 		".Xresources":    "~/.Xresources",
 		".agignore":      "~/.agignore",
@@ -44,7 +45,7 @@ var DefaultMappings = map[string]Mappings{
 		"peco":           "~/.config/peco",
 		"rc.lua":         "~/.config/rc.lua",
 	},
-	"darwin": Mappings{
+	"darwin": MappingsJson{
 		".agignore":      "~/.agignore",
 		".bash_login":    "~/.bash_login",
 		".bash_profile":  "~/.bash_profile",
@@ -72,8 +73,8 @@ var DefaultMappings = map[string]Mappings{
 	},
 }
 
-func parseMappingsJson(file string) (Mappings, error) {
-	var m Mappings
+func parseMappingsJson(file string) (MappingsJson, error) {
+	var m MappingsJson
 
 	bytes, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -89,23 +90,47 @@ func parseMappingsJson(file string) (Mappings, error) {
 	return m, nil
 }
 
+func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
+	if json == nil {
+		return nil, nil
+	}
+	m := make(Mappings, len(json))
+	for k, v := range json {
+		p, err := NewAbsolutePath(v)
+		if err != nil {
+			return nil, err
+		}
+		m[k] = p
+	}
+	return m, nil
+}
+
 func mergeMappingsFromFile(dist *Mappings, file string) error {
-	m, err := parseMappingsJson(file)
+	j, err := parseMappingsJson(file)
 	if err != nil {
 		return err
 	}
-	if m == nil {
+	if j == nil {
 		return nil
+	}
+
+	m, err := convertMappingsJsonToMappings(j)
+	if err != nil {
+		return err
 	}
 
 	for k, v := range m {
 		(*dist)[k] = v
 	}
+
 	return nil
 }
 
 func GetMappingsForPlatform(platform, parent string) (Mappings, error) {
-	m := DefaultMappings[platform]
+	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
+	if err != nil {
+		return nil, err
+	}
 	if m == nil {
 		m = Mappings{}
 	}
@@ -117,6 +142,12 @@ func GetMappingsForPlatform(platform, parent string) (Mappings, error) {
 	if err := mergeMappingsFromFile(&m, path.Join(parent, fmt.Sprintf("mappings_%s.json", platform))); err != nil {
 		return nil, err
 	}
+
+	// TODO:
+	// Normalize path (e.g. ~/.foo -> /path/to/home/.foo)
+
+	// TODO:
+	// Validate mappings: linked path must be absolute
 
 	return m, nil
 }
