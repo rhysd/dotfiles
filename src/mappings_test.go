@@ -155,6 +155,20 @@ func TestGetMappingsInvalidJson(t *testing.T) {
 	}
 }
 
+func TestGetMappingsEmptyKey(t *testing.T) {
+	createTestJson("mappings.json", `
+	{
+		"": "/path/to/somewhere"
+	}
+	`)
+	defer os.RemoveAll("_test_config")
+
+	_, err := GetMappings("_test_config")
+	if err == nil {
+		t.Fatalf("Empty key must raise an error")
+	}
+}
+
 func TestGetMappingsInvalidPathValue(t *testing.T) {
 	createTestJson("mappings.json", `
 	{

@@ -96,6 +96,9 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 	}
 	m := make(Mappings, len(json))
 	for k, v := range json {
+		if k == "" {
+			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", v)
+		}
 		p, err := NewAbsolutePath(v)
 		if err != nil {
 			return nil, err
