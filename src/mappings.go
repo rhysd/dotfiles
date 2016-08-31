@@ -173,7 +173,7 @@ func link(from string, to AbsolutePath, dry bool) error {
 	p := path.Join(cwd, from)
 	if _, err := os.Stat(p); err != nil {
 		if from[0] != '.' {
-			return fmt.Errorf("'%s' does not exist. Please check the file in your dotfiles.")
+			return fmt.Errorf("'%s' does not exist. Please check the file in your dotfiles.", from)
 		}
 
 		p = path.Join(cwd, from[1:]) // Note: Omit '.'
@@ -182,12 +182,12 @@ func link(from string, to AbsolutePath, dry bool) error {
 		}
 	}
 
-	if _, err := os.Stat(string(to)); err != nil {
-		fmt.Printf("'%s' already exists.  Skipped.", to)
+	if _, err := os.Stat(string(to)); err == nil {
+		fmt.Printf("'%s' already exists.  Skipped.\n", to)
 		return nil
 	}
 
-	if err := os.MkdirAll(path.Dir(string(to)), os.ModeDir|0644); err != nil {
+	if err := os.MkdirAll(path.Dir(string(to)), os.ModeDir|os.ModePerm); err != nil {
 		return err
 	}
 
@@ -197,7 +197,7 @@ func link(from string, to AbsolutePath, dry bool) error {
 		return nil
 	}
 
-	if err := os.Symlink(from, string(to)); err != nil {
+	if err := os.Symlink(p, string(to)); err != nil {
 		return err
 	}
 
