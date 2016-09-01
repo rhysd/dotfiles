@@ -48,7 +48,7 @@ func TestGetMappingsUnknownPlatform(t *testing.T) {
 	}
 }
 
-func getwd() string {
+func getcwd() string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func createTestJson(fname, contents string) {
 		panic(err)
 	}
 
-	cwd := getwd()
+	cwd := getcwd()
 
 	f, err := os.OpenFile(path.Join(cwd, "_test_config", fname), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
@@ -188,14 +188,14 @@ func TestGetMappingsInvalidPathValue(t *testing.T) {
 }
 
 func mapping(k string, v string) Mappings {
-	cwd := getwd()
+	cwd := getcwd()
 	m := make(Mappings, 1)
 	m[k] = AbsolutePath(path.Join(cwd, v))
 	return m
 }
 
 func openFile(n string) *os.File {
-	cwd := getwd()
+	cwd := getcwd()
 	f, err := os.OpenFile(path.Join(cwd, n), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		panic(err)
@@ -208,11 +208,11 @@ func openFile(n string) *os.File {
 }
 
 func isSymlinkTo(n, d string) bool {
-	cwd := getwd()
+	cwd := getcwd()
 	source := path.Join(cwd, n)
 	s, err := os.Lstat(source)
 	if err != nil {
-		panic(err)
+		return false
 	}
 	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
 		return false
@@ -227,7 +227,10 @@ func isSymlinkTo(n, d string) bool {
 func TestLinkNormalFile(t *testing.T) {
 	m := mapping("._test_source.conf", "_test.conf")
 	f := openFile("._test_source.conf")
-	defer f.Close()
+	defer func() {
+		f.Close()
+		defer os.Remove("._test_source.conf")
+	}()
 
 	err := m.CreateAllLinks(false)
 	if err != nil {
@@ -238,13 +241,21 @@ func TestLinkNormalFile(t *testing.T) {
 		t.Fatalf("Symbolic link not found")
 	}
 	defer os.Remove("_test.conf")
-	defer os.Remove("._test_source.conf")
+
+	// Skipping already existing link
+	err = m.CreateAllLinks(false)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestLinkToNonExistingDir(t *testing.T) {
 	m := mapping("._source.conf", "_dist_dir/_dist.conf")
 	f := openFile("._source.conf")
-	defer f.Close()
+	defer func() {
+		f.Close()
+		defer os.Remove("._source.conf")
+	}()
 
 	err := m.CreateAllLinks(false)
 	if err != nil {
@@ -255,5 +266,119 @@ func TestLinkToNonExistingDir(t *testing.T) {
 		t.Fatalf("Symbolic link not found. Directory was not generated to put symlink into?")
 	}
 	defer os.RemoveAll("_dist_dir")
-	defer os.Remove("._source.conf")
+}
+
+func TestLinkDirSymlink(t *testing.T) {
+	m := mapping("._source_dir", "_dist_dir")
+	if err := os.MkdirAll("._source_dir", os.ModeDir|os.ModePerm); err != nil {
+		panic(err)
+	}
+	defer os.Remove("._source_dir")
+
+	err := m.CreateAllLinks(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isSymlinkTo("_dist_dir", "._source_dir") {
+		t.Fatalf("Symbolic link to directory not found.")
+	}
+	defer os.Remove("_dist_dir")
+}
+
+func TestLinkSpecifiedMappingOnly(t *testing.T) {
+	m := mapping("._source.conf", "_dist.conf")
+	m["LICENSE.txt"] = AbsolutePath(path.Join(getcwd(), "_never_created.txt"))
+	f := openFile("._source.conf")
+	defer func() {
+		f.Close()
+		os.Remove("._source.conf")
+	}()
+
+	err := m.CreateSomeLinks([]string{"._source.conf"}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isSymlinkTo("_dist.conf", "._source.conf") {
+		t.Fatalf("Symbolic link not found.")
+	}
+	defer os.Remove("_dist.conf")
+
+	if isSymlinkTo("_never_created.txt", "LICENSE.txt") {
+		t.Fatalf("Symbolic link not found.")
+	}
+}
+
+func TestLinkDotOmittedSourceName(t *testing.T) {
+	m := mapping("._test_source.conf", "_test.conf")
+	f := openFile("_test_source.conf")
+	defer func() {
+		f.Close()
+		defer os.Remove("_test_source.conf")
+	}()
+
+	err := m.CreateAllLinks(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isSymlinkTo("_test.conf", "_test_source.conf") {
+		t.Fatalf("Symbolic link not found")
+	}
+	defer os.Remove("_test.conf")
+}
+
+func TestLinkSpecifyingNonExistingFile(t *testing.T) {
+	cases := []([]string){[]string{}, []string{"unknown_config.conf"}}
+	for _, specified := range cases {
+		m := mapping("LICENSE.txt", "never_created.conf")
+		err := m.CreateSomeLinks(specified, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := os.Lstat("never_created.conf"); err == nil {
+			t.Errorf("never_created.conf was created")
+			os.Remove("never_created.conf")
+		}
+	}
+}
+
+func TestLinkSourceNotExist(t *testing.T) {
+	m := mapping(".unknown.conf", "never_created.conf")
+	err := m.CreateAllLinks(false)
+	if err == nil {
+		t.Errorf("Expected an error for non-existing source")
+	}
+	m2 := mapping("unknown.conf", "never_created.conf")
+	err = m2.CreateSomeLinks([]string{"unknown.conf"}, false)
+	if err == nil {
+		t.Errorf("Expected an error for non-existing source")
+	}
+}
+
+func TestLinkNullDist(t *testing.T) {
+	m := Mappings{"License.txt": AbsolutePath("")}
+	err := m.CreateAllLinks(false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLinkDryRun(t *testing.T) {
+	m := mapping("._test_source.conf", "_test.conf")
+	f := openFile("._test_source.conf")
+	defer func() {
+		f.Close()
+		defer os.Remove("._test_source.conf")
+	}()
+
+	err := m.CreateAllLinks(true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if isSymlinkTo("_test.conf", "._test_source.conf") {
+		t.Fatalf("Symbolic link not found")
+	}
 }
