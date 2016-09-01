@@ -17,6 +17,7 @@ var (
 
 	link           = cli.Command("link", "Put symlinks to setup your configurations")
 	link_dryrun    = link.Flag("dry", "Show what happens only").Bool()
+	link_repo      = link.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
 	link_specified = link.Arg("files", "Files to link. If you specify no file, all will be linked.").Strings()
 	// TODO link_no_default = link.Flag("no-default", "Link files specified by mappings.json and mappings_*.json")
 
@@ -47,7 +48,7 @@ func main() {
 	case clone.FullCommand():
 		handleError(dotfiles.Clone(*clone_repo, *clone_path, *clone_https))
 	case link.FullCommand():
-		handleError(dotfiles.Link(*link_specified, *link_dryrun))
+		handleError(dotfiles.Link(*link_repo, *link_specified, *link_dryrun))
 	case list.FullCommand():
 		unimplemented("list")
 	case clean.FullCommand():

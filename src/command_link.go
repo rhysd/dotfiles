@@ -5,13 +5,16 @@ import (
 	"path"
 )
 
-func Link(specified []string, dry bool) error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
+func Link(repo string, specified []string, dry bool) error {
+	if repo == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		repo = cwd
 	}
 
-	m, err := GetMappings(path.Join(cwd, ".dotfiles"))
+	m, err := GetMappings(path.Join(repo, ".dotfiles"))
 	if err != nil {
 		return err
 	}

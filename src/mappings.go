@@ -183,7 +183,7 @@ func link(from string, to AbsolutePath, dry bool) error {
 	}
 
 	if _, err := os.Stat(string(to)); err == nil {
-		fmt.Printf("'%s' already exists.  Skipped.\n", to)
+		// Target already exists. Skipped.
 		return nil
 	}
 

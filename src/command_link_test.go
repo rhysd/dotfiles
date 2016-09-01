@@ -49,7 +49,7 @@ func TestLinkAll(t *testing.T) {
 		panic(err)
 	}
 
-	if err := Link(nil, false); err != nil {
+	if err := Link("", nil, false); err != nil {
 		t.Error(err)
 	}
 	defer os.Remove("_dist.conf")
@@ -99,8 +99,18 @@ func TestLinkSome(t *testing.T) {
 		panic(err)
 	}
 
-	if err := Link([]string{"_source.conf"}, false); err != nil {
+	if err := Link("", []string{"_source.conf"}, false); err != nil {
 		t.Error(err)
 	}
 	defer os.Remove("_dist.conf")
+}
+
+func TestLinkNotInDotfiles(t *testing.T) {
+	if err := Link("", nil, false); err != nil {
+		t.Errorf("Should not show an error when .dotfiles directory does not exist: %s", err.Error())
+	}
+
+	if err := Link("unknown_directory", nil, false); err != nil {
+		t.Errorf("Should not show an error when .dotfiles directory does not exist: %s", err.Error())
+	}
 }
