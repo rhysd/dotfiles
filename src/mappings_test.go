@@ -347,13 +347,13 @@ func TestLinkSpecifyingNonExistingFile(t *testing.T) {
 func TestLinkSourceNotExist(t *testing.T) {
 	m := mapping(".unknown.conf", "never_created.conf")
 	err := m.CreateAllLinks(false)
-	if err == nil {
-		t.Errorf("Expected an error for non-existing source")
+	if err != nil {
+		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
 	}
 	m2 := mapping("unknown.conf", "never_created.conf")
 	err = m2.CreateSomeLinks([]string{"unknown.conf"}, false)
-	if err == nil {
-		t.Errorf("Expected an error for non-existing source")
+	if err != nil {
+		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
 	}
 }
 

@@ -173,12 +173,12 @@ func link(from string, to AbsolutePath, dry bool) error {
 	p := path.Join(cwd, from)
 	if _, err := os.Stat(p); err != nil {
 		if from[0] != '.' {
-			return fmt.Errorf("'%s' does not exist. Please check the file in your dotfiles.", from)
+			return nil
 		}
 
 		p = path.Join(cwd, from[1:]) // Note: Omit '.'
 		if _, err := os.Stat(p); err != nil {
-			return fmt.Errorf("Both '%s' and '%s' don't exist.  Please check the file in your dotfiles", from, from[1:])
+			return nil
 		}
 	}
 
