@@ -3,17 +3,21 @@ package dotfiles
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func Clean(repo string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
 	if repo == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
 		repo = cwd
 	} else {
+		if !filepath.IsAbs(repo) {
+			repo = filepath.Join(cwd, repo)
+		}
 		s, err := os.Stat(repo)
 		if err != nil {
 			return err

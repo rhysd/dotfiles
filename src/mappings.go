@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 )
 
 type NothingLinkedError struct {
@@ -251,6 +252,46 @@ func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 
 	if count == 0 && specified != nil && len(specified) > 0 {
 		return &NothingLinkedError{}
+	}
+
+	return nil
+}
+
+func (mappings Mappings) unlink(repo, to AbsolutePath) error {
+	s, err := os.Lstat(string(to))
+	if err != nil {
+		// Note: Symlink not found
+		return nil
+	}
+
+	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
+		return nil
+	}
+
+	source, err := os.Readlink(string(to))
+	if err != nil {
+		return err
+	}
+
+	if !strings.HasPrefix(source, string(repo)) {
+		// Note: When the symlink is not linked from dotfiles repository.
+		return nil
+	}
+
+	if err := os.Remove(string(to)); err != nil {
+		return err
+	}
+
+	fmt.Printf("Removed symlink: '%s' -> '%s'\n", source, to)
+
+	return nil
+}
+
+func (mappings Mappings) UnlinkAll(repo AbsolutePath) error {
+	for _, to := range mappings {
+		if err := mappings.unlink(repo, to); err != nil {
+			return err
+		}
 	}
 
 	return nil
