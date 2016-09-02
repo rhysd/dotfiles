@@ -330,29 +330,36 @@ func TestLinkDotOmittedSourceName(t *testing.T) {
 }
 
 func TestLinkSpecifyingNonExistingFile(t *testing.T) {
-	cases := []([]string){[]string{}, []string{"unknown_config.conf"}}
-	for _, specified := range cases {
-		m := mapping("LICENSE.txt", "never_created.conf")
-		err := m.CreateSomeLinks(specified, false)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err := os.Lstat("never_created.conf"); err == nil {
-			t.Errorf("never_created.conf was created")
-			os.Remove("never_created.conf")
-		}
+	m := mapping("LICENSE.txt", "never_created.conf")
+
+	err := m.CreateSomeLinks([]string{}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Lstat("never_created.conf"); err == nil {
+		t.Errorf("never_created.conf was created")
+		os.Remove("never_created.conf")
+	}
+
+	err = m.CreateSomeLinks([]string{"unknown_config.conf"}, false)
+	if _, ok := err.(*NothingLinkedError); !ok {
+		t.Fatal(err)
+	}
+	if _, err = os.Lstat("never_created.conf"); err == nil {
+		t.Errorf("never_created.conf was created")
+		os.Remove("never_created.conf")
 	}
 }
 
 func TestLinkSourceNotExist(t *testing.T) {
 	m := mapping(".unknown.conf", "never_created.conf")
 	err := m.CreateAllLinks(false)
-	if err != nil {
+	if _, ok := err.(*NothingLinkedError); !ok {
 		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
 	}
 	m2 := mapping("unknown.conf", "never_created.conf")
 	err = m2.CreateSomeLinks([]string{"unknown.conf"}, false)
-	if err != nil {
+	if _, ok := err.(*NothingLinkedError); !ok {
 		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
 	}
 }

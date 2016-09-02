@@ -9,6 +9,18 @@ import (
 	"runtime"
 )
 
+type NothingLinkedError struct {
+	Repo string
+}
+
+func (err NothingLinkedError) Error() string {
+	if err.Repo == "" {
+		return "Nothing was linked."
+	} else {
+		return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it.", err.Repo)
+	}
+}
+
 type Mappings map[string]AbsolutePath
 type MappingsJson map[string]string
 
@@ -159,67 +171,87 @@ func fileExists(file string) bool {
 	return err == nil && !s.IsDir()
 }
 
-func link(from string, to AbsolutePath, dry bool) error {
+func link(from string, to AbsolutePath, dry bool) (bool, error) {
 	if to.IsEmpty() {
 		// Note: Ignore if dist is specified 'null' in JSON
-		return nil
+		return true, nil
 	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	p := path.Join(cwd, from)
 	if _, err := os.Stat(p); err != nil {
 		if from[0] != '.' {
-			return nil
+			return false, nil
 		}
 
 		p = path.Join(cwd, from[1:]) // Note: Omit '.'
 		if _, err := os.Stat(p); err != nil {
-			return nil
+			return false, nil
 		}
 	}
 
 	if _, err := os.Stat(string(to)); err == nil {
 		// Target already exists. Skipped.
-		return nil
+		return true, nil
 	}
 
 	if err := os.MkdirAll(path.Dir(string(to)), os.ModeDir|os.ModePerm); err != nil {
-		return err
+		return false, err
 	}
 
 	fmt.Printf("Link: '%s' -> '%s'\n", from, to)
 
 	if dry {
-		return nil
+		return true, nil
 	}
 
 	if err := os.Symlink(p, string(to)); err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
 func (mappings Mappings) CreateAllLinks(dry bool) error {
+	count := 0
 	for from, to := range mappings {
-		if err := link(from, to, dry); err != nil {
+		linked, err := link(from, to, dry)
+		if err != nil {
 			return err
 		}
+		if linked {
+			count += 1
+		}
 	}
+
+	if count == 0 {
+		return &NothingLinkedError{}
+	}
+
 	return nil
 }
 
 func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
+	count := 0
 	for _, from := range specified {
 		if to, ok := mappings[from]; ok {
-			if err := link(from, to, dry); err != nil {
+			linked, err := link(from, to, dry)
+			if err != nil {
 				return err
+			}
+			if linked {
+				count += 1
 			}
 		}
 	}
+
+	if count == 0 && specified != nil && len(specified) > 0 {
+		return &NothingLinkedError{}
+	}
+
 	return nil
 }

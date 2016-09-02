@@ -20,7 +20,11 @@ func Link(repo string, specified []string, dry bool) error {
 	}
 
 	if specified == nil || len(specified) == 0 {
-		return m.CreateAllLinks(dry)
+		err = m.CreateAllLinks(dry)
+		if e, ok := err.(*NothingLinkedError); ok {
+			e.Repo = repo
+		}
+		return err
 	} else {
 		return m.CreateSomeLinks(specified, dry)
 	}
