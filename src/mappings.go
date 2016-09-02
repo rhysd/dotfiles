@@ -257,41 +257,50 @@ func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	return nil
 }
 
-func (mappings Mappings) unlink(repo, to AbsolutePath) error {
+func (mappings Mappings) unlink(repo, to AbsolutePath) (bool, error) {
 	s, err := os.Lstat(string(to))
 	if err != nil {
 		// Note: Symlink not found
-		return nil
+		return false, nil
 	}
 
 	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
-		return nil
+		return false, nil
 	}
 
 	source, err := os.Readlink(string(to))
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if !strings.HasPrefix(source, string(repo)) {
 		// Note: When the symlink is not linked from dotfiles repository.
-		return nil
+		return false, nil
 	}
 
 	if err := os.Remove(string(to)); err != nil {
-		return err
+		return false, err
 	}
 
 	fmt.Printf("Removed symlink: '%s' -> '%s'\n", source, to)
 
-	return nil
+	return true, nil
 }
 
 func (mappings Mappings) UnlinkAll(repo AbsolutePath) error {
+	count := 0
 	for _, to := range mappings {
-		if err := mappings.unlink(repo, to); err != nil {
+		unlinked, err := mappings.unlink(repo, to)
+		if err != nil {
 			return err
 		}
+		if unlinked {
+			count += 1
+		}
+	}
+
+	if count == 0 {
+		fmt.Printf("No symlink was removed (dotfiles: '%s').\n", repo)
 	}
 
 	return nil

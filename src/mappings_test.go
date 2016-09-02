@@ -389,3 +389,71 @@ func TestLinkDryRun(t *testing.T) {
 		t.Fatalf("Symbolic link not found")
 	}
 }
+
+func createSymlink(from, to string) {
+	cwd := getcwd()
+	if err := os.Symlink(path.Join(cwd, from), path.Join(cwd, to)); err != nil {
+		panic(err)
+	}
+}
+
+func TestUnlinkNoFile(t *testing.T) {
+	m := mapping("._source.fonf", "._dist.conf")
+	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestUnlinkFiles(t *testing.T) {
+	f := openFile("._source.conf")
+	defer func() {
+		f.Close()
+		os.Remove("._source.conf")
+	}()
+	createSymlink("._source.conf", "._dist.conf")
+	m := mapping("._source.fonf", "._dist.conf")
+	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Lstat("._dist.conf"); err == nil {
+		os.Remove("._dist.conf")
+		t.Errorf("Unlinked symlink must be removed")
+	}
+}
+
+func TestUnlinkAnotherFileAlreadyExist(t *testing.T) {
+	openFile("._dummy.conf").Close()
+	defer os.Remove("._dummy.conf")
+	m := mapping("._source.fonf", "._dummy.conf")
+	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+		t.Error(err)
+	}
+}
+
+// e.g.
+//	expected: dotfiles/vimrc -> ~/.vimrc
+//	actual: another_dir/vimrc -> ~/.vimrc
+func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
+	dir := path.Join(getcwd(), "_test_dir")
+
+	if err := os.Mkdir(dir, os.ModePerm|os.ModeDir); err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(dir)
+
+	openFile("_outside.conf").Close()
+	defer os.Remove("_outside.conf")
+
+	createSymlink("_outside.conf", "_test.conf")
+	m := mapping("_another_test.conf", "_test.conf")
+	if err := m.UnlinkAll(AbsolutePath(dir)); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Lstat(path.Join(getcwd(), "_test.conf")); err != nil {
+		t.Fatalf("When target is already linked to outside dotfiles, error should not occur: %s", err.Error())
+	}
+
+	os.Remove("_test.conf")
+}
