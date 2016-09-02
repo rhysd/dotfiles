@@ -21,10 +21,8 @@ func TestLinkAll(t *testing.T) {
 
 	f, err := os.OpenFile(path.Join(dir, "mappings.json"), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		os.RemoveAll(dir)
 		panic(err)
 	}
-	defer f.Close()
 
 	_, err = f.WriteString(`
 	{
@@ -34,6 +32,7 @@ func TestLinkAll(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	f.Close()
 
 	source := path.Join(cwd, "_source.conf")
 	g, err := os.OpenFile(source, os.O_CREATE|os.O_RDWR, 0644)
