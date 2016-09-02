@@ -3,7 +3,7 @@ package dotfiles
 import (
 	"fmt"
 	"os/user"
-	"path"
+	"path/filepath"
 )
 
 type AbsolutePath string
@@ -18,10 +18,10 @@ func NewAbsolutePath(s string) (AbsolutePath, error) {
 		if err != nil {
 			return AbsolutePath(""), err
 		}
-		return AbsolutePath(path.Join(u.HomeDir, s[1:])), nil
+		return AbsolutePath(filepath.Join(u.HomeDir, s[1:])), nil
 	}
 
-	if !path.IsAbs(s) {
+	if !filepath.IsAbs(s) {
 		return "", fmt.Errorf("Not an absolute path: '%s'", s)
 	}
 	return AbsolutePath(s), nil
