@@ -1,6 +1,7 @@
 package dotfiles
 
 import (
+	"fmt"
 	"os"
 	"path"
 )
@@ -12,6 +13,14 @@ func Link(repo string, specified []string, dry bool) error {
 			return err
 		}
 		repo = cwd
+	} else {
+		s, err := os.Stat(repo)
+		if err != nil {
+			return err
+		}
+		if !s.IsDir() {
+			return fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory.", repo)
+		}
 	}
 
 	m, err := GetMappings(path.Join(repo, ".dotfiles"))

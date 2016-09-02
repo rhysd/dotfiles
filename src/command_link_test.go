@@ -105,12 +105,40 @@ func TestLinkSome(t *testing.T) {
 	defer os.Remove("_dist.conf")
 }
 
-func TestLinkNotInDotfiles(t *testing.T) {
+func TestLinkConfigDirDoesNotExist(t *testing.T) {
 	if err := Link("", nil, false); err != nil {
-		t.Errorf("Should not show an error when .dotfiles directory does not exist: %s", err.Error())
+		if _, ok := err.(*NothingLinkedError); !ok {
+			t.Errorf("Non-existtence of .dotfiles directory does not cause an error: %s", err.Error())
+		}
+	}
+}
+
+func TestLinkSpecifiedRepoDoesNotExist(t *testing.T) {
+	if err := Link("unknown_directory", nil, false); err == nil {
+		t.Errorf("Should make an error for unknown dotfiles repository")
 	}
 
-	if err := Link("unknown_directory", nil, false); err != nil {
-		t.Errorf("Should not show an error when .dotfiles directory does not exist: %s", err.Error())
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	p := path.Join(cwd, "_dummy_file")
+	f, err := os.OpenFile(p, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		f.Close()
+		os.Remove(p)
+	}()
+
+	_, err = f.WriteString("dummy file")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := Link("_dummy_file", nil, false); err == nil {
+		t.Errorf("Should make an error when repository is actually a file")
 	}
 }
