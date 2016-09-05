@@ -1,34 +1,14 @@
 package dotfiles
 
-import (
-	"fmt"
-	"os"
-	"path"
-	"path/filepath"
-)
+import "path/filepath"
 
-func Link(repo string, specified []string, dry bool) error {
-	cwd, err := os.Getwd()
+func Link(repo_input string, specified []string, dry bool) error {
+	repo, err := AbsolutePathToRepo(repo_input)
 	if err != nil {
 		return err
 	}
 
-	if repo == "" {
-		repo = cwd
-	} else {
-		if !filepath.IsAbs(repo) {
-			repo = filepath.Join(cwd, repo)
-		}
-		s, err := os.Stat(repo)
-		if err != nil {
-			return err
-		}
-		if !s.IsDir() {
-			return fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory.", repo)
-		}
-	}
-
-	m, err := GetMappings(path.Join(repo, ".dotfiles"))
+	m, err := GetMappings(filepath.Join(string(repo), ".dotfiles"))
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,10 @@
 package dotfiles
 
 import (
+	"os"
+	"os/user"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -51,5 +54,60 @@ func TestAbsolutePathRelativePathError(t *testing.T) {
 	_, err := NewAbsolutePath("relative-path")
 	if err == nil {
 		t.Errorf("NewAbsolutePath() must raise an error when relative path is given")
+	}
+}
+
+func TestAbsolutePathToRepo(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	u, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	abs := func(p string) string {
+		a, err := filepath.Abs(p)
+		if err != nil {
+			panic(err)
+		}
+		return a
+	}
+
+	for _, c := range []struct {
+		input    string
+		expected string
+	}{
+		{".", abs(".")},
+		{"", cwd},
+		{"../src", cwd},
+		{"~", u.HomeDir},
+		{cwd, cwd},
+	} {
+		r, err := AbsolutePathToRepo(c.input)
+		if err != nil {
+			t.Errorf("Unexpected error for input '%s': %s", c.input, err.Error())
+			continue
+		}
+		if string(r) != c.expected {
+			t.Errorf("Expected '%s' as absolute path but actually '%s'", c.expected, r)
+		}
+	}
+
+	f, err := os.OpenFile("existing_file", os.O_RDWR|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
+	defer os.Remove("existing_file")
+
+	for _, e := range []string{
+		"unknown_dir",
+		"./existing_file",
+	} {
+		_, err := AbsolutePathToRepo(e)
+		if err == nil {
+			t.Errorf("'%s' is an invalid value for repository but no error occurred", e)
+		}
 	}
 }

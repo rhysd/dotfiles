@@ -11,11 +11,11 @@ import (
 )
 
 type NothingLinkedError struct {
-	Repo string
+	Repo AbsolutePath
 }
 
 func (err NothingLinkedError) Error() string {
-	if err.Repo == "" {
+	if err.Repo.IsEmpty() {
 		return "Nothing was linked."
 	} else {
 		return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it.", err.Repo)
