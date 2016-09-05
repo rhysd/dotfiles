@@ -2,7 +2,7 @@ package dotfiles
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -63,7 +63,7 @@ func createTestJson(fname, contents string) {
 
 	cwd := getcwd()
 
-	f, err := os.OpenFile(path.Join(cwd, "_test_config", fname), os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(filepath.Join(cwd, "_test_config", fname), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		os.RemoveAll("_test_config")
 		panic(err)
@@ -97,7 +97,7 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 	if !m[".vimrc"].Compare("/override/path/vimrc") {
 		t.Errorf("Mapping should be overridden but actually '%s'", m[".vimrc"])
 	}
-	if !path.IsAbs(string(m[".conf"])) {
+	if !filepath.IsAbs(string(m[".conf"])) {
 		t.Errorf("'~' must be converted to absolute path: %s", m[".conf"])
 	}
 
@@ -190,13 +190,13 @@ func TestGetMappingsInvalidPathValue(t *testing.T) {
 func mapping(k string, v string) Mappings {
 	cwd := getcwd()
 	m := make(Mappings, 1)
-	m[k] = AbsolutePath(path.Join(cwd, v))
+	m[k] = AbsolutePath(filepath.Join(cwd, v))
 	return m
 }
 
 func openFile(n string) *os.File {
 	cwd := getcwd()
-	f, err := os.OpenFile(path.Join(cwd, n), os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(filepath.Join(cwd, n), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -209,7 +209,7 @@ func openFile(n string) *os.File {
 
 func isSymlinkTo(n, d string) bool {
 	cwd := getcwd()
-	source := path.Join(cwd, n)
+	source := filepath.Join(cwd, n)
 	s, err := os.Lstat(source)
 	if err != nil {
 		return false
@@ -221,7 +221,7 @@ func isSymlinkTo(n, d string) bool {
 	if err != nil {
 		panic(err)
 	}
-	return dist == path.Join(cwd, d)
+	return dist == filepath.Join(cwd, d)
 }
 
 func TestLinkNormalFile(t *testing.T) {
@@ -288,7 +288,7 @@ func TestLinkDirSymlink(t *testing.T) {
 
 func TestLinkSpecifiedMappingOnly(t *testing.T) {
 	m := mapping("._source.conf", "_dist.conf")
-	m["LICENSE.txt"] = AbsolutePath(path.Join(getcwd(), "_never_created.txt"))
+	m["LICENSE.txt"] = AbsolutePath(filepath.Join(getcwd(), "_never_created.txt"))
 	f := openFile("._source.conf")
 	defer func() {
 		f.Close()
@@ -392,7 +392,7 @@ func TestLinkDryRun(t *testing.T) {
 
 func createSymlink(from, to string) {
 	cwd := getcwd()
-	if err := os.Symlink(path.Join(cwd, from), path.Join(cwd, to)); err != nil {
+	if err := os.Symlink(filepath.Join(cwd, from), filepath.Join(cwd, to)); err != nil {
 		panic(err)
 	}
 }
@@ -435,7 +435,7 @@ func TestUnlinkAnotherFileAlreadyExist(t *testing.T) {
 //	expected: dotfiles/vimrc -> ~/.vimrc
 //	actual: another_dir/vimrc -> ~/.vimrc
 func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
-	dir := path.Join(getcwd(), "_test_dir")
+	dir := filepath.Join(getcwd(), "_test_dir")
 
 	if err := os.Mkdir(dir, os.ModePerm|os.ModeDir); err != nil {
 		panic(err)
@@ -451,9 +451,66 @@ func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := os.Lstat(path.Join(getcwd(), "_test.conf")); err != nil {
+	if _, err := os.Lstat(filepath.Join(getcwd(), "_test.conf")); err != nil {
 		t.Fatalf("When target is already linked to outside dotfiles, error should not occur: %s", err.Error())
 	}
 
 	os.Remove("_test.conf")
+}
+
+func TestActualLinksEmpty(t *testing.T) {
+	m := mapping("._source.conf", "._dest.conf")
+	l, err := m.ActualLinks(AbsolutePath(getcwd()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(l) > 0 {
+		t.Errorf("Link does not exist but actually '%v' was reported", l)
+	}
+}
+
+func TestActualLinksLinkExists(t *testing.T) {
+	openFile("._source.conf").Close()
+	defer os.Remove("._source.conf")
+	createSymlink("._source.conf", "._dist.conf")
+	defer os.Remove("._dist.conf")
+	cwd := getcwd()
+	m := mapping("._source.fonf", "._dist.conf")
+
+	l, err := m.ActualLinks(AbsolutePath(cwd))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(l) != 1 {
+		t.Fatalf("Only one mapping is intended to be added but actually %d mappings exist", len(l))
+	}
+
+	e, ok := l[filepath.Join(cwd, "._source.conf")]
+	if !ok {
+		t.Fatalf("._source.conf in current directory must be a source of symlink but actually not: '%v'", l)
+	}
+
+	expected := filepath.Join(cwd, "._dist.conf")
+	if e != expected {
+		t.Fatalf("'%s' is expected as a dist of symlink, but actually '%s'", expected, e)
+	}
+}
+
+func TestActualLinksNotDotfile(t *testing.T) {
+	openFile("._source.conf").Close()
+	defer os.Remove("._source.conf")
+	openFile("._dist.conf").Close()
+	defer os.Remove("._dist.conf")
+	cwd := getcwd()
+	m := mapping("._source.fonf", "._dist.conf")
+
+	l, err := m.ActualLinks(AbsolutePath(cwd))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(l) > 0 {
+		t.Fatalf("When a mapping is a hard link, it's not a dotfile and should not considered.  But actually links '%v' are detected", l)
+	}
 }
