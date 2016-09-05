@@ -21,7 +21,8 @@ var (
 	link_specified = link.Arg("files", "Files to link. If you specify no file, all will be linked.").Strings()
 	// TODO link_no_default = link.Flag("no-default", "Link files specified by mappings.json and mappings_*.json")
 
-	list = cli.Command("list", "Show a list of symbolic link put by this command")
+	list      = cli.Command("list", "Show a list of symbolic link put by this command")
+	list_repo = list.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
 
 	clean      = cli.Command("clean", "Remove all symbolic links put by this command")
 	clean_repo = clean.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
@@ -51,7 +52,7 @@ func main() {
 	case link.FullCommand():
 		handleError(dotfiles.Link(*link_repo, *link_specified, *link_dryrun))
 	case list.FullCommand():
-		unimplemented("list")
+		handleError(dotfiles.List(*list_repo))
 	case clean.FullCommand():
 		handleError(dotfiles.Clean(*clean_repo))
 	case update.FullCommand():

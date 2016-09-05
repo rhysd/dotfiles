@@ -257,25 +257,34 @@ func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	return nil
 }
 
-func (mappings Mappings) unlink(repo, to AbsolutePath) (bool, error) {
+func getLinkSource(repo, to AbsolutePath) (string, error) {
 	s, err := os.Lstat(string(to))
 	if err != nil {
 		// Note: Symlink not found
-		return false, nil
+		return "", nil
 	}
 
 	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
-		return false, nil
+		return "", nil
 	}
 
 	source, err := os.Readlink(string(to))
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	if !strings.HasPrefix(source, string(repo)) {
 		// Note: When the symlink is not linked from dotfiles repository.
-		return false, nil
+		return "", nil
+	}
+
+	return source, nil
+}
+
+func (mappings Mappings) unlink(repo, to AbsolutePath) (bool, error) {
+	source, err := getLinkSource(repo, to)
+	if source == "" || err != nil {
+		return false, err
 	}
 
 	if err := os.Remove(string(to)); err != nil {
@@ -304,4 +313,18 @@ func (mappings Mappings) UnlinkAll(repo AbsolutePath) error {
 	}
 
 	return nil
+}
+
+func (mappings Mappings) ActualLinks(repo AbsolutePath) (map[string]string, error) {
+	ret := map[string]string{}
+	for _, to := range mappings {
+		s, err := getLinkSource(repo, to)
+		if err != nil {
+			return nil, err
+		}
+		if s != "" {
+			ret[s] = string(to)
+		}
+	}
+	return ret, nil
 }
