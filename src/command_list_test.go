@@ -28,8 +28,8 @@ func TestListEmptyList(t *testing.T) {
 	var buf bytes.Buffer
 	io.Copy(&buf, r)
 	s := buf.String()
-	if len(s) > 0 {
-		t.Errorf("When no valid mapping exists, it should output nothing, but output '%s'", s)
+	if !strings.Contains(s, "No link was found") {
+		t.Errorf("When no valid mapping exists, it should output the result message for it, but actually output '%s'", s)
 	}
 }
 
