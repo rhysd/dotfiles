@@ -110,4 +110,24 @@ func TestAbsolutePathToRepo(t *testing.T) {
 			t.Errorf("'%s' is an invalid value for repository but no error occurred", e)
 		}
 	}
+
+	for _, c := range []struct {
+		env      string
+		expected string
+	}{
+		{cwd, cwd},
+		{"~", u.HomeDir},
+		{".", abs(".")},
+	} {
+		os.Setenv("DOTFILES_REPO_PATH", c.env)
+		r, err := AbsolutePathToRepo("")
+		if err != nil {
+			t.Errorf("Unexpected error for $DOEFILES_REPO_PATH '%s': %s", c.env, err.Error())
+			continue
+		}
+		if string(r) != c.expected {
+			t.Errorf("Expected '%s' as absolute path but actually '%s'", c.expected, r)
+		}
+	}
+	os.Setenv("DOTFILES_REPO_PATH", "")
 }
