@@ -27,7 +27,8 @@ var (
 	clean      = cli.Command("clean", "Remove all symbolic links put by this command")
 	clean_repo = clean.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
 
-	update = cli.Command("update", "Update your dotfiles repository")
+	update      = cli.Command("update", "Update your dotfiles repository")
+	update_repo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
 
 	version = cli.Command("version", "Show version")
 )
@@ -56,7 +57,7 @@ func main() {
 	case clean.FullCommand():
 		handleError(dotfiles.Clean(*clean_repo))
 	case update.FullCommand():
-		unimplemented("update")
+		handleError(dotfiles.Update(*update_repo))
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
 	default:

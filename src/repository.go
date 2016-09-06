@@ -62,8 +62,7 @@ func (repo *Repository) Clone() error {
 	}
 
 	if repo.ParentDir != cwd {
-		err = os.Chdir(repo.ParentDir)
-		if err != nil {
+		if err := os.Chdir(repo.ParentDir); err != nil {
 			return err
 		}
 		defer os.Chdir(cwd)
@@ -73,8 +72,7 @@ func (repo *Repository) Clone() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err = cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 
