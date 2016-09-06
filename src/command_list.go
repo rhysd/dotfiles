@@ -25,5 +25,9 @@ func List(specified string) error {
 		fmt.Printf("'%s' -> '%s'\n", source, dist)
 	}
 
+	if len(links) == 0 {
+		fmt.Printf("No link was found (dotfiles: %s)\n", repo)
+	}
+
 	return nil
 }

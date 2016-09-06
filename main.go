@@ -17,18 +17,18 @@ var (
 
 	link           = cli.Command("link", "Put symlinks to setup your configurations")
 	link_dryrun    = link.Flag("dry", "Show what happens only").Bool()
-	link_repo      = link.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
+	link_repo      = link.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 	link_specified = link.Arg("files", "Files to link. If you specify no file, all will be linked.").Strings()
 	// TODO link_no_default = link.Flag("no-default", "Link files specified by mappings.json and mappings_*.json")
 
 	list      = cli.Command("list", "Show a list of symbolic link put by this command")
-	list_repo = list.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
+	list_repo = list.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
 	clean      = cli.Command("clean", "Remove all symbolic links put by this command")
-	clean_repo = clean.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
+	clean_repo = clean.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
 	update      = cli.Command("update", "Update your dotfiles repository")
-	update_repo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, the current directory is assumed to be dotfiles repository.").String()
+	update_repo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
 	version = cli.Command("version", "Show version")
 )

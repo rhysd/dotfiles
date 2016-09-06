@@ -35,7 +35,12 @@ func AbsolutePathToRepo(repo string) (AbsolutePath, error) {
 	}
 
 	if repo == "" {
+		repo = os.Getenv("DOTFILES_REPO_PATH")
+	}
+
+	if repo == "" {
 		repo = cwd
+		fmt.Fprintln(os.Stderr, "No repository was specified nor $DOTFILES_REPO_PATH was not set. Assuming current repository is a dotfiles repository.\n")
 	} else if repo[0] == '~' {
 		u, err := user.Current()
 		if err != nil {
