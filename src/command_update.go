@@ -16,8 +16,8 @@ func Update(repo_input string) error {
 		return err
 	}
 
-	if string(repo) != cwd {
-		if err := os.Chdir(string(repo)); err != nil {
+	if repo.String() != cwd {
+		if err := os.Chdir(repo.String()); err != nil {
 			return err
 		}
 		defer os.Chdir(cwd)

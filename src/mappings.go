@@ -5,24 +5,26 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/rhysd/abspath"
 )
 
 type NothingLinkedError struct {
-	Repo AbsolutePath
+	RepoPath string
 }
 
 func (err NothingLinkedError) Error() string {
-	if err.Repo.IsEmpty() {
+	if err.RepoPath == "" {
 		return "Nothing was linked."
 	} else {
-		return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it.", err.Repo)
+		return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it.", err.RepoPath)
 	}
 }
 
-type Mappings map[string]AbsolutePath
+type Mappings map[string]abspath.AbsPath
 type MappingsJson map[string]string
 
 var DefaultMappings = map[string]MappingsJson{
@@ -87,10 +89,10 @@ var DefaultMappings = map[string]MappingsJson{
 	},
 }
 
-func parseMappingsJson(file string) (MappingsJson, error) {
+func parseMappingsJson(file abspath.AbsPath) (MappingsJson, error) {
 	var m MappingsJson
 
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := ioutil.ReadFile(file.String())
 	if err != nil {
 		// Note:
 		// It's not an error that the file is not found
@@ -113,7 +115,11 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 		if k == "" {
 			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", v)
 		}
-		p, err := NewAbsolutePath(v)
+		if v == "" {
+			// Note: Ignore if dist is specified 'null' in JSON
+			continue
+		}
+		p, err := abspath.ExpandFromSlash(v)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +128,7 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 	return m, nil
 }
 
-func mergeMappingsFromFile(dist *Mappings, file string) error {
+func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 	j, err := parseMappingsJson(file)
 	if err != nil {
 		return err
@@ -143,7 +149,7 @@ func mergeMappingsFromFile(dist *Mappings, file string) error {
 	return nil
 }
 
-func GetMappingsForPlatform(platform, parent string) (Mappings, error) {
+func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, error) {
 	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
 	if err != nil {
 		return nil, err
@@ -152,18 +158,18 @@ func GetMappingsForPlatform(platform, parent string) (Mappings, error) {
 		m = Mappings{}
 	}
 
-	if err := mergeMappingsFromFile(&m, path.Join(parent, "mappings.json")); err != nil {
+	if err := mergeMappingsFromFile(&m, parent.Join("mappings.json")); err != nil {
 		return nil, err
 	}
 
-	if err := mergeMappingsFromFile(&m, path.Join(parent, fmt.Sprintf("mappings_%s.json", platform))); err != nil {
+	if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
 		return nil, err
 	}
 
 	return m, nil
 }
 
-func GetMappings(config_dir string) (Mappings, error) {
+func GetMappings(config_dir abspath.AbsPath) (Mappings, error) {
 	return GetMappingsForPlatform(runtime.GOOS, config_dir)
 }
 
@@ -172,45 +178,40 @@ func fileExists(file string) bool {
 	return err == nil && !s.IsDir()
 }
 
-func link(from string, to AbsolutePath, dry bool) (bool, error) {
-	if to.IsEmpty() {
-		// Note: Ignore if dist is specified 'null' in JSON
-		return true, nil
-	}
-
+func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return false, err
 	}
 
-	p := path.Join(cwd, from)
+	p := filepath.Join(cwd, from)
 	if _, err := os.Stat(p); err != nil {
 		if from[0] != '.' {
 			return false, nil
 		}
 
-		p = path.Join(cwd, from[1:]) // Note: Omit '.'
+		p = filepath.Join(cwd, from[1:]) // Note: Omit '.'
 		if _, err := os.Stat(p); err != nil {
 			return false, nil
 		}
 	}
 
-	if _, err := os.Stat(string(to)); err == nil {
+	if _, err := os.Stat(to.String()); err == nil {
 		// Target already exists. Skipped.
 		return true, nil
 	}
 
-	if err := os.MkdirAll(path.Dir(string(to)), os.ModeDir|os.ModePerm); err != nil {
+	if err := os.MkdirAll(to.Dir().String(), os.ModeDir|os.ModePerm); err != nil {
 		return false, err
 	}
 
-	fmt.Printf("Link: '%s' -> '%s'\n", from, to)
+	fmt.Printf("Link: '%s' -> '%s'\n", from, to.String())
 
 	if dry {
 		return true, nil
 	}
 
-	if err := os.Symlink(p, string(to)); err != nil {
+	if err := os.Symlink(p, to.String()); err != nil {
 		return false, err
 	}
 
@@ -257,8 +258,8 @@ func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	return nil
 }
 
-func getLinkSource(repo, to AbsolutePath) (string, error) {
-	s, err := os.Lstat(string(to))
+func getLinkSource(repo, to abspath.AbsPath) (string, error) {
+	s, err := os.Lstat(to.String())
 	if err != nil {
 		// Note: Symlink not found
 		return "", nil
@@ -268,12 +269,12 @@ func getLinkSource(repo, to AbsolutePath) (string, error) {
 		return "", nil
 	}
 
-	source, err := os.Readlink(string(to))
+	source, err := os.Readlink(to.String())
 	if err != nil {
 		return "", err
 	}
 
-	if !strings.HasPrefix(source, string(repo)) {
+	if !strings.HasPrefix(source, repo.String()) {
 		// Note: When the symlink is not linked from dotfiles repository.
 		return "", nil
 	}
@@ -281,22 +282,22 @@ func getLinkSource(repo, to AbsolutePath) (string, error) {
 	return source, nil
 }
 
-func (mappings Mappings) unlink(repo, to AbsolutePath) (bool, error) {
+func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 	source, err := getLinkSource(repo, to)
 	if source == "" || err != nil {
 		return false, err
 	}
 
-	if err := os.Remove(string(to)); err != nil {
+	if err := os.Remove(to.String()); err != nil {
 		return false, err
 	}
 
-	fmt.Printf("Removed symlink: '%s' -> '%s'\n", source, to)
+	fmt.Printf("Removed symlink: '%s' -> '%s'\n", source, to.String())
 
 	return true, nil
 }
 
-func (mappings Mappings) UnlinkAll(repo AbsolutePath) error {
+func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	count := 0
 	for _, to := range mappings {
 		unlinked, err := mappings.unlink(repo, to)
@@ -309,13 +310,13 @@ func (mappings Mappings) UnlinkAll(repo AbsolutePath) error {
 	}
 
 	if count == 0 {
-		fmt.Printf("No symlink was removed (dotfiles: '%s').\n", repo)
+		fmt.Printf("No symlink was removed (dotfiles: '%s').\n", repo.String())
 	}
 
 	return nil
 }
 
-func (mappings Mappings) ActualLinks(repo AbsolutePath) (map[string]string, error) {
+func (mappings Mappings) ActualLinks(repo abspath.AbsPath) (map[string]string, error) {
 	ret := map[string]string{}
 	for _, to := range mappings {
 		s, err := getLinkSource(repo, to)
@@ -323,7 +324,7 @@ func (mappings Mappings) ActualLinks(repo AbsolutePath) (map[string]string, erro
 			return nil, err
 		}
 		if s != "" {
-			ret[s] = string(to)
+			ret[s] = to.String()
 		}
 	}
 	return ret, nil

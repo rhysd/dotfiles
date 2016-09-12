@@ -1,14 +1,12 @@
 package dotfiles
 
-import "path/filepath"
-
 func Clean(repo_input string) error {
 	repo, err := AbsolutePathToRepo(repo_input)
 	if err != nil {
 		return err
 	}
 
-	m, err := GetMappings(filepath.Join(string(repo), ".dotfiles"))
+	m, err := GetMappings(repo.Join(".dotfiles"))
 	if err != nil {
 		return err
 	}

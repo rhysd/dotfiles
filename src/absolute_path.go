@@ -2,6 +2,7 @@ package dotfiles
 
 import (
 	"fmt"
+	"github.com/rhysd/abspath"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -28,39 +29,26 @@ func NewAbsolutePath(s string) (AbsolutePath, error) {
 	return AbsolutePath(s), nil
 }
 
-func AbsolutePathToRepo(repo string) (AbsolutePath, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return AbsolutePath(""), err
-	}
-
+func AbsolutePathToRepo(repo string) (abspath.AbsPath, error) {
 	if repo == "" {
 		repo = os.Getenv("DOTFILES_REPO_PATH")
 	}
 
 	if repo == "" {
-		repo = cwd
+		repo = "."
 		fmt.Fprintln(os.Stderr, "No repository was specified nor $DOTFILES_REPO_PATH was not set. Assuming current repository is a dotfiles repository.\n")
-	} else if repo[0] == '~' {
-		u, err := user.Current()
-		if err != nil {
-			return AbsolutePath(""), err
-		}
-		repo = filepath.Join(u.HomeDir, repo[1:])
-	} else if !filepath.IsAbs(repo) {
-		repo = filepath.Join(cwd, repo)
 	}
 
-	s, err := os.Stat(repo)
+	p, err := abspath.ExpandFrom(repo)
 	if err != nil {
-		return AbsolutePath(""), err
+		return abspath.AbsPath{}, err
 	}
 
-	if !s.IsDir() {
-		return AbsolutePath(""), fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory.", repo)
+	if !p.IsDir() {
+		return abspath.AbsPath{}, fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory.", p.String())
 	}
 
-	return AbsolutePath(repo), nil
+	return p, nil
 }
 
 func (a AbsolutePath) Compare(s string) bool {

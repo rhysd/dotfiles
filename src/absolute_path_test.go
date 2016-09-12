@@ -89,7 +89,7 @@ func TestAbsolutePathToRepo(t *testing.T) {
 			t.Errorf("Unexpected error for input '%s': %s", c.input, err.Error())
 			continue
 		}
-		if string(r) != c.expected {
+		if r.String() != c.expected {
 			t.Errorf("Expected '%s' as absolute path but actually '%s'", c.expected, r)
 		}
 	}
@@ -125,7 +125,7 @@ func TestAbsolutePathToRepo(t *testing.T) {
 			t.Errorf("Unexpected error for $DOEFILES_REPO_PATH '%s': %s", c.env, err.Error())
 			continue
 		}
-		if string(r) != c.expected {
+		if r.String() != c.expected {
 			t.Errorf("Expected '%s' as absolute path but actually '%s'", c.expected, r)
 		}
 	}
