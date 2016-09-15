@@ -14,7 +14,7 @@ func absolutePathToRepo(repo string) (abspath.AbsPath, error) {
 
 	if repo == "" {
 		repo = "."
-		fmt.Fprintln(os.Stderr, "No repository was specified nor $DOTFILES_REPO_PATH was not set. Assuming current repository is a dotfiles repository.\n")
+		fmt.Fprintf(os.Stderr, "No repository was specified nor $DOTFILES_REPO_PATH was not set. Assuming current repository is a dotfiles repository.\n\n")
 	}
 
 	p, err := abspath.ExpandFrom(repo)
