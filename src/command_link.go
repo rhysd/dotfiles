@@ -1,7 +1,7 @@
 package dotfiles
 
 func Link(repo_input string, specified []string, dry bool) error {
-	repo, err := AbsolutePathToRepo(repo_input)
+	repo, err := absolutePathToRepo(repo_input)
 	if err != nil {
 		return err
 	}

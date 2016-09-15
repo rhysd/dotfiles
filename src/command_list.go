@@ -3,7 +3,7 @@ package dotfiles
 import "fmt"
 
 func List(specified string) error {
-	repo, err := AbsolutePathToRepo(specified)
+	repo, err := absolutePathToRepo(specified)
 	if err != nil {
 		return err
 	}
