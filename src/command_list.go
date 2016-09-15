@@ -1,17 +1,14 @@
 package dotfiles
 
-import (
-	"fmt"
-	"path/filepath"
-)
+import "fmt"
 
 func List(specified string) error {
-	repo, err := AbsolutePathToRepo(specified)
+	repo, err := absolutePathToRepo(specified)
 	if err != nil {
 		return err
 	}
 
-	m, err := GetMappings(filepath.Join(string(repo), ".dotfiles"))
+	m, err := GetMappings(repo.Join(".dotfiles"))
 	if err != nil {
 		return err
 	}
@@ -26,7 +23,7 @@ func List(specified string) error {
 	}
 
 	if len(links) == 0 {
-		fmt.Printf("No link was found (dotfiles: %s)\n", repo)
+		fmt.Printf("No link was found (dotfiles: %s)\n", repo.String())
 	}
 
 	return nil

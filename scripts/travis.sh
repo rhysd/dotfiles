@@ -14,6 +14,8 @@ else
     go get github.com/mattn/goveralls
     if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
     go get -t -d -v ./...
+    go vet
+    cd src/ && go vet && cd -
     go test -v -coverprofile=coverage.out ./src/
     $HOME/gopath/bin/goveralls -coverprofile coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 fi
