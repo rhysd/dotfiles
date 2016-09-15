@@ -2,20 +2,25 @@ package dotfiles
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/rhysd/abspath"
 )
 
 func TestGetMappingsConfigDirNotExist(t *testing.T) {
-	m, err := GetMappings("unknown_directory")
+	p, err := abspath.ExpandFrom("unknown_directory")
+	if err != nil {
+		panic(err)
+	}
+	m, err := GetMappings(p)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(m) == 0 {
 		t.Errorf("Mappings should not be empty. Default value is not set.")
 	}
-	if m[".vimrc"] == "" {
+	if m[".vimrc"].String() == "" {
 		t.Errorf("Any platform default value must have '.vimrc' mapping. %v", m)
 	}
 }
@@ -26,20 +31,29 @@ func TestGetMappingsConfigFileNotExist(t *testing.T) {
 	}
 	defer os.Remove("_test_config")
 
-	m, err := GetMappings("_test_config")
+	p, err := abspath.ExpandFrom("_test_config")
+	if err != nil {
+		panic(err)
+	}
+	m, err := GetMappings(p)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(m) == 0 {
 		t.Errorf("Mappings should not be empty. Default value is not set.")
 	}
-	if m[".vimrc"] == "" {
+	if m[".vimrc"].String() == "" {
 		t.Errorf("Any platform default value must have '.vimrc' mapping. %v", m)
 	}
 }
 
 func TestGetMappingsUnknownPlatform(t *testing.T) {
-	m, err := GetMappingsForPlatform("unknown", "unknown_directory")
+	p, err := abspath.ExpandFrom("unknown_directory")
+	if err != nil {
+		panic(err)
+	}
+
+	m, err := GetMappingsForPlatform("unknown", p)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,8 +62,8 @@ func TestGetMappingsUnknownPlatform(t *testing.T) {
 	}
 }
 
-func getcwd() string {
-	cwd, err := os.Getwd()
+func getcwd() abspath.AbsPath {
+	cwd, err := abspath.Getwd()
 	if err != nil {
 		panic(err)
 	}
@@ -61,9 +75,7 @@ func createTestJson(fname, contents string) {
 		panic(err)
 	}
 
-	cwd := getcwd()
-
-	f, err := os.OpenFile(filepath.Join(cwd, "_test_config", fname), os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(getcwd().Join("_test_config", fname).String(), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		os.RemoveAll("_test_config")
 		panic(err)
@@ -87,28 +99,30 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 	`)
 	defer os.RemoveAll("_test_config")
 
-	m, err := GetMappingsForPlatform("unknown", "_test_config")
+	p, err := abspath.ExpandFrom("_test_config")
 	if err != nil {
-		t.Fatal(err)
-	}
-	if !m["some_file"].Compare("/path/to/some_file") {
-		t.Errorf("Mapping value set in mappings.json is wrong: '%s'", m["some_file"])
-	}
-	if !m[".vimrc"].Compare("/override/path/vimrc") {
-		t.Errorf("Mapping should be overridden but actually '%s'", m[".vimrc"])
-	}
-	if !filepath.IsAbs(string(m[".conf"])) {
-		t.Errorf("'~' must be converted to absolute path: %s", m[".conf"])
+		panic(err)
 	}
 
-	m, err = GetMappingsForPlatform("darwin", "_test_config")
+	m, err := GetMappingsForPlatform("unknown", p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !m["some_file"].Compare("/path/to/some_file") {
+	if m["some_file"].String() != "/path/to/some_file" {
+		t.Errorf("Mapping value set in mappings.json is wrong: '%s'", m["some_file"])
+	}
+	if m[".vimrc"].String() != "/override/path/vimrc" {
+		t.Errorf("Mapping should be overridden but actually '%s'", m[".vimrc"])
+	}
+
+	m, err = GetMappingsForPlatform("darwin", p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m["some_file"].String() != "/path/to/some_file" {
 		t.Errorf("Mapping value set in mappings.json is wrong: '%s' in Darwin", m["some_file"])
 	}
-	if !m[".vimrc"].Compare("/override/path/vimrc") {
+	if m[".vimrc"].String() != "/override/path/vimrc" {
 		t.Errorf("Mapping should be overridden but actually '%s' for Darwin platform", m[".vimrc"])
 	}
 }
@@ -122,27 +136,32 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 	`)
 	defer os.RemoveAll("_test_config")
 
-	m, err := GetMappingsForPlatform("darwin", "_test_config")
+	p, err := abspath.ExpandFrom("_test_config")
+	if err != nil {
+		panic(err)
+	}
+
+	m, err := GetMappingsForPlatform("darwin", p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !m["some_file"].Compare("/path/to/some_file") {
+	if m["some_file"].String() != "/path/to/some_file" {
 		t.Errorf("Mapping value set in mappings_darwin.json is wrong: '%s' in Darwin", m["some_file"])
 	}
-	if !m[".vimrc"].Compare("/override/path/vimrc") {
+	if m[".vimrc"].String() != "/override/path/vimrc" {
 		t.Errorf("Mapping should be overridden by mappings_darwin.json but actually '%s'", m[".vimrc"])
 	}
 
-	m, err = GetMappingsForPlatform("windows", "_test_config")
+	m, err = GetMappingsForPlatform("windows", p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !m["some_file"].IsEmpty() {
+	if m["some_file"].String() != "" {
 		t.Errorf("Different configuration must not be loaded but actually some_file was linked to '%s'", m["some_file"])
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(string(m[".vimrc"]), DefaultMappings["windows"][".vimrc"][1:]) {
+	if !strings.HasSuffix(m[".vimrc"].String(), DefaultMappings["windows"][".vimrc"][1:]) {
 		t.Errorf("Mapping should not be overridden by mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"])
 	}
 }
@@ -154,8 +173,12 @@ func TestGetMappingsInvalidJson(t *testing.T) {
 	`)
 	defer os.RemoveAll("_test_config")
 
-	_, err := GetMappings("_test_config")
-	if err == nil {
+	p, err := abspath.ExpandFrom("_test_config")
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err := GetMappings(p); err == nil {
 		t.Fatalf("Invalid Json configuration must raise a parse error")
 	}
 }
@@ -168,8 +191,12 @@ func TestGetMappingsEmptyKey(t *testing.T) {
 	`)
 	defer os.RemoveAll("_test_config")
 
-	_, err := GetMappings("_test_config")
-	if err == nil {
+	p, err := abspath.ExpandFrom("_test_config")
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err := GetMappings(p); err == nil {
 		t.Fatalf("Empty key must raise an error")
 	}
 }
@@ -181,22 +208,24 @@ func TestGetMappingsInvalidPathValue(t *testing.T) {
 	}`)
 	defer os.RemoveAll("_test_config")
 
-	_, err := GetMappings("_test_config")
-	if err == nil {
+	p, err := abspath.ExpandFrom("_test_config")
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err := GetMappings(p); err == nil {
 		t.Fatalf("Relative path must be checked")
 	}
 }
 
 func mapping(k string, v string) Mappings {
-	cwd := getcwd()
 	m := make(Mappings, 1)
-	m[k] = AbsolutePath(filepath.Join(cwd, v))
+	m[k] = getcwd().Join(v)
 	return m
 }
 
 func openFile(n string) *os.File {
-	cwd := getcwd()
-	f, err := os.OpenFile(filepath.Join(cwd, n), os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(getcwd().Join(n).String(), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -209,7 +238,7 @@ func openFile(n string) *os.File {
 
 func isSymlinkTo(n, d string) bool {
 	cwd := getcwd()
-	source := filepath.Join(cwd, n)
+	source := cwd.Join(n).String()
 	s, err := os.Lstat(source)
 	if err != nil {
 		return false
@@ -221,7 +250,7 @@ func isSymlinkTo(n, d string) bool {
 	if err != nil {
 		panic(err)
 	}
-	return dist == filepath.Join(cwd, d)
+	return dist == cwd.Join(d).String()
 }
 
 func TestLinkNormalFile(t *testing.T) {
@@ -288,7 +317,7 @@ func TestLinkDirSymlink(t *testing.T) {
 
 func TestLinkSpecifiedMappingOnly(t *testing.T) {
 	m := mapping("._source.conf", "_dist.conf")
-	m["LICENSE.txt"] = AbsolutePath(filepath.Join(getcwd(), "_never_created.txt"))
+	m["LICENSE.txt"] = getcwd().Join("_never_created.txt")
 	f := openFile("._source.conf")
 	defer func() {
 		f.Close()
@@ -365,10 +394,10 @@ func TestLinkSourceNotExist(t *testing.T) {
 }
 
 func TestLinkNullDist(t *testing.T) {
-	m := Mappings{"License.txt": AbsolutePath("")}
+	m := Mappings{"License.txt": abspath.AbsPath{}}
 	err := m.CreateAllLinks(false)
-	if err != nil {
-		t.Error(err)
+	if err == nil {
+		t.Errorf("Nothing was linked but error did not occur")
 	}
 }
 
@@ -392,14 +421,14 @@ func TestLinkDryRun(t *testing.T) {
 
 func createSymlink(from, to string) {
 	cwd := getcwd()
-	if err := os.Symlink(filepath.Join(cwd, from), filepath.Join(cwd, to)); err != nil {
+	if err := os.Symlink(cwd.Join(from).String(), cwd.Join(to).String()); err != nil {
 		panic(err)
 	}
 }
 
 func TestUnlinkNoFile(t *testing.T) {
 	m := mapping("._source.fonf", "._dist.conf")
-	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+	if err := m.UnlinkAll(getcwd()); err != nil {
 		t.Error(err)
 	}
 }
@@ -412,7 +441,7 @@ func TestUnlinkFiles(t *testing.T) {
 	}()
 	createSymlink("._source.conf", "._dist.conf")
 	m := mapping("._source.fonf", "._dist.conf")
-	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+	if err := m.UnlinkAll(getcwd()); err != nil {
 		t.Error(err)
 	}
 
@@ -426,7 +455,7 @@ func TestUnlinkAnotherFileAlreadyExist(t *testing.T) {
 	openFile("._dummy.conf").Close()
 	defer os.Remove("._dummy.conf")
 	m := mapping("._source.fonf", "._dummy.conf")
-	if err := m.UnlinkAll(AbsolutePath(getcwd())); err != nil {
+	if err := m.UnlinkAll(getcwd()); err != nil {
 		t.Error(err)
 	}
 }
@@ -435,23 +464,23 @@ func TestUnlinkAnotherFileAlreadyExist(t *testing.T) {
 //	expected: dotfiles/vimrc -> ~/.vimrc
 //	actual: another_dir/vimrc -> ~/.vimrc
 func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
-	dir := filepath.Join(getcwd(), "_test_dir")
+	dir := getcwd().Join("_test_dir")
 
-	if err := os.Mkdir(dir, os.ModePerm|os.ModeDir); err != nil {
+	if err := os.Mkdir(dir.String(), os.ModePerm|os.ModeDir); err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(dir)
+	defer os.RemoveAll(dir.String())
 
 	openFile("_outside.conf").Close()
 	defer os.Remove("_outside.conf")
 
 	createSymlink("_outside.conf", "_test.conf")
 	m := mapping("_another_test.conf", "_test.conf")
-	if err := m.UnlinkAll(AbsolutePath(dir)); err != nil {
+	if err := m.UnlinkAll(dir); err != nil {
 		t.Error(err)
 	}
 
-	if _, err := os.Lstat(filepath.Join(getcwd(), "_test.conf")); err != nil {
+	if _, err := os.Lstat(getcwd().Join("_test.conf").String()); err != nil {
 		t.Fatalf("When target is already linked to outside dotfiles, error should not occur: %s", err.Error())
 	}
 
@@ -460,7 +489,7 @@ func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
 
 func TestActualLinksEmpty(t *testing.T) {
 	m := mapping("._source.conf", "._dest.conf")
-	l, err := m.ActualLinks(AbsolutePath(getcwd()))
+	l, err := m.ActualLinks(getcwd())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -477,7 +506,7 @@ func TestActualLinksLinkExists(t *testing.T) {
 	cwd := getcwd()
 	m := mapping("._source.fonf", "._dist.conf")
 
-	l, err := m.ActualLinks(AbsolutePath(cwd))
+	l, err := m.ActualLinks(cwd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,12 +515,12 @@ func TestActualLinksLinkExists(t *testing.T) {
 		t.Fatalf("Only one mapping is intended to be added but actually %d mappings exist", len(l))
 	}
 
-	e, ok := l[filepath.Join(cwd, "._source.conf")]
+	e, ok := l[cwd.Join("._source.conf").String()]
 	if !ok {
 		t.Fatalf("._source.conf in current directory must be a source of symlink but actually not: '%v'", l)
 	}
 
-	expected := filepath.Join(cwd, "._dist.conf")
+	expected := cwd.Join("._dist.conf").String()
 	if e != expected {
 		t.Fatalf("'%s' is expected as a dist of symlink, but actually '%s'", expected, e)
 	}
@@ -505,7 +534,7 @@ func TestActualLinksNotDotfile(t *testing.T) {
 	cwd := getcwd()
 	m := mapping("._source.fonf", "._dist.conf")
 
-	l, err := m.ActualLinks(AbsolutePath(cwd))
+	l, err := m.ActualLinks(cwd)
 	if err != nil {
 		t.Fatal(err)
 	}

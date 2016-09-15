@@ -119,6 +119,9 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 			// Note: Ignore if dist is specified 'null' in JSON
 			continue
 		}
+		if v[0] != '~' && v[0] != '/' {
+			return nil, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
+		}
 		p, err := abspath.ExpandFromSlash(v)
 		if err != nil {
 			return nil, err
