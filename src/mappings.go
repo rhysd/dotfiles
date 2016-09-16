@@ -201,6 +201,7 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 
 	if _, err := os.Stat(to.String()); err == nil {
 		// Target already exists. Skipped.
+		fmt.Printf("Exist: '%s' -> '%s'\n", from, to.String())
 		return true, nil
 	}
 
@@ -208,7 +209,7 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 		return false, err
 	}
 
-	fmt.Printf("Link: '%s' -> '%s'\n", from, to.String())
+	fmt.Printf("Link:  '%s' -> '%s'\n", from, to.String())
 
 	if dry {
 		return true, nil
