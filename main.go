@@ -40,7 +40,8 @@ func unimplemented(cmd string) {
 func handleError(err error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-		os.Exit(1)
+		// Note: Exit code is detemined with looking http://tldp.org/LDP/abs/html/exitcodes.html
+		os.Exit(113)
 	} else {
 		os.Exit(0)
 	}
