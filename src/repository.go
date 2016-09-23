@@ -5,32 +5,49 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/rhysd/abspath"
 )
 
 // TODO: Enable to specify branch name?
 type Repository struct {
-	Url       string
-	ParentDir string
+	Url             string
+	Path            abspath.AbsPath
+	IncludesRepoDir bool
 }
 
-func NewRepository(spec, path string, https bool) (*Repository, error) {
-	if path == "" {
-		var err error
-		if path, err = os.Getwd(); err != nil {
-			return nil, err
-		}
-	} else {
-		s, err := os.Stat(path)
+func pathToCloneRepo(specified string) (abspath.AbsPath, bool, error) {
+	if specified != "" {
+		repo, err := abspath.ExpandFrom(specified)
 		if err != nil {
-			return nil, err
+			return abspath.AbsPath{}, false, err
 		}
-		if !s.IsDir() {
-			return nil, fmt.Errorf("'%s' is not a directory", path)
-		}
+		return repo, false, nil
 	}
+
+	if env := os.Getenv("DOTFILES_REPO_PATH"); env != "" {
+		if _, err := os.Stat(env); err == nil {
+			return abspath.AbsPath{}, false, fmt.Errorf("Repository direcotyr is specified as '%s' with $DOTFILES_REPO_PATH but it already exists", env)
+		}
+		repo, err := abspath.New(env)
+		if err != nil {
+			return abspath.AbsPath{}, false, err
+		}
+		return repo, true, nil
+	}
+
+	repo, err := abspath.ExpandFrom(".")
+	if err != nil {
+		return abspath.AbsPath{}, false, err
+	}
+	return repo, false, nil
+}
+
+func NewRepository(spec, specified string, https bool) (*Repository, error) {
 	if spec == "" {
 		return nil, fmt.Errorf("Remote path to clone must not be empty")
 	}
+
 	if strings.HasPrefix(spec, "https://") {
 		if !strings.HasSuffix(spec, ".git") {
 			spec = spec + ".git"
@@ -52,25 +69,35 @@ func NewRepository(spec, path string, https bool) (*Repository, error) {
 			spec = fmt.Sprintf("git@github.com:%s/dotfiles.git", spec)
 		}
 	}
-	return &Repository{spec, path}, nil
+
+	p, b, err := pathToCloneRepo(specified)
+	if err != nil {
+		return nil, err
+	}
+	return &Repository{spec, p, b}, nil
 }
 
 func (repo *Repository) Clone() error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	if repo.ParentDir != cwd {
-		if err := os.Chdir(repo.ParentDir); err != nil {
+	args := []string{"clone", repo.Url}
+	if repo.IncludesRepoDir {
+		args = append(args, repo.Path.String())
+	} else {
+		cwd, err := os.Getwd()
+		if err != nil {
 			return err
 		}
-		defer os.Chdir(cwd)
+		if cwd != repo.Path.String() {
+			if err := os.Chdir(repo.Path.String()); err != nil {
+				return err
+			}
+			defer os.Chdir(cwd)
+		}
 	}
 
-	cmd := exec.Command("git", "clone", repo.Url)
+	cmd := exec.Command("git", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
 
 	if err := cmd.Run(); err != nil {
 		return err

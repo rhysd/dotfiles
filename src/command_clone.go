@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func Clone(spec, path string, https bool) error {
-	repo, err := NewRepository(spec, path, https)
+func Clone(spec, specified string, https bool) error {
+	repo, err := NewRepository(spec, specified, https)
 	if err != nil {
 		return err
 	}
@@ -15,7 +15,11 @@ func Clone(spec, path string, https bool) error {
 		return err
 	}
 
-	fmt.Printf("\nYour dotfiles was successfully cloned from '%s' into '%s'\n", repo.Url, repo.ParentDir)
+	s := "into"
+	if repo.IncludesRepoDir {
+		s = "as"
+	}
+	fmt.Printf("\nYour dotfiles was successfully cloned from '%s' %s '%s'\n", repo.Url, s, repo.Path.String())
 
 	return nil
 }
