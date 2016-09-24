@@ -57,6 +57,29 @@ var DefaultMappings = map[string]MappingsJson{
 		".zprofile":      "~/.zprofile",
 		".zshenv":        "~/.zshenv",
 		".zshrc":         "~/.zshrc",
+		"Xmodmap":        "~/.Xmodmap",
+		"Xresources":     "~/.Xresources",
+		"agignore":       "~/.agignore",
+		"bash_login":     "~/.bash_login",
+		"bash_profile":   "~/.bash_profile",
+		"bashrc":         "~/.bashrc",
+		"emacs.d":        "~/.emacs.d",
+		"emacs.el":       "~/.emacs.d/init.el",
+		"eslintrc":       "~/.eslintrc",
+		"eslintrc.json":  "~/.eslintrc.json",
+		"eslintrc.yml":   "~/.eslintrc.yml",
+		"gvimrc":         "~/.gvimrc",
+		"npmrc":          "~/.npmrc",
+		"profile":        "~/.profile",
+		"pryrc":          "~/.pryrc",
+		"pylintrc":       "~/.pylintrc",
+		"tmux.conf":      "~/.tmux.conf",
+		"vim":            "~/.vim",
+		"vimrc":          "~/.vimrc",
+		"zlogin":         "~/.zlogin",
+		"zprofile":       "~/.zprofile",
+		"zshenv":         "~/.zshenv",
+		"zshrc":          "~/.zshrc",
 		"init.el":        "~/.emacs.d/init.el",
 		"peco":           "~/.config/peco",
 		"rc.lua":         "~/.config/rc.lua",
@@ -84,6 +107,28 @@ var DefaultMappings = map[string]MappingsJson{
 		".zprofile":      "~/.zprofile",
 		".zshenv":        "~/.zshenv",
 		".zshrc":         "~/.zshrc",
+		"agignore":       "~/.agignore",
+		"bash_login":     "~/.bash_login",
+		"bash_profile":   "~/.bash_profile",
+		"bashrc":         "~/.bashrc",
+		"emacs.d":        "~/.emacs.d",
+		"emacs.el":       "~/.emacs.d/init.el",
+		"eslintrc":       "~/.eslintrc",
+		"eslintrc.json":  "~/.eslintrc.json",
+		"eslintrc.yml":   "~/.eslintrc.yml",
+		"gvimrc":         "~/.gvimrc",
+		"htoprc":         "~/.htoprc",
+		"npmrc":          "~/.npmrc",
+		"profile":        "~/.profile",
+		"pryrc":          "~/.pryrc",
+		"pylintrc":       "~/.pylintrc",
+		"tmux.conf":      "~/.tmux.conf",
+		"vim":            "~/.vim",
+		"vimrc":          "~/.vimrc",
+		"zlogin":         "~/.zlogin",
+		"zprofile":       "~/.zprofile",
+		"zshenv":         "~/.zshenv",
+		"zshrc":          "~/.zshrc",
 		"init.el":        "~/.emacs.d/init.el",
 		"peco":           "~/.config/peco",
 	},
@@ -189,14 +234,7 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 
 	p := filepath.Join(cwd, from)
 	if _, err := os.Stat(p); err != nil {
-		if from[0] != '.' {
-			return false, nil
-		}
-
-		p = filepath.Join(cwd, from[1:]) // Note: Omit '.'
-		if _, err := os.Stat(p); err != nil {
-			return false, nil
-		}
+		return false, nil
 	}
 
 	if _, err := os.Stat(to.String()); err == nil {

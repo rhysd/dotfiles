@@ -339,25 +339,6 @@ func TestLinkSpecifiedMappingOnly(t *testing.T) {
 	}
 }
 
-func TestLinkDotOmittedSourceName(t *testing.T) {
-	m := mapping("._test_source.conf", "_test.conf")
-	f := openFile("_test_source.conf")
-	defer func() {
-		f.Close()
-		defer os.Remove("_test_source.conf")
-	}()
-
-	err := m.CreateAllLinks(false)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !isSymlinkTo("_test.conf", "_test_source.conf") {
-		t.Fatalf("Symbolic link not found")
-	}
-	defer os.Remove("_test.conf")
-}
-
 func TestLinkSpecifyingNonExistingFile(t *testing.T) {
 	m := mapping("LICENSE.txt", "never_created.conf")
 
