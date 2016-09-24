@@ -22,12 +22,15 @@ func pathToCloneRepo(specified string) (abspath.AbsPath, bool, error) {
 		if err != nil {
 			return abspath.AbsPath{}, false, err
 		}
+		if s, err := os.Stat(repo.String()); err != nil || !s.IsDir() {
+			return abspath.AbsPath{}, false, fmt.Errorf("Specified path does not exist or is a file: '%s'", repo.String())
+		}
 		return repo, false, nil
 	}
 
 	if env := os.Getenv("DOTFILES_REPO_PATH"); env != "" {
 		if _, err := os.Stat(env); err == nil {
-			return abspath.AbsPath{}, false, fmt.Errorf("Repository direcotyr is specified as '%s' with $DOTFILES_REPO_PATH but it already exists", env)
+			return abspath.AbsPath{}, false, fmt.Errorf("Repository directory is specified as '%s' with $DOTFILES_REPO_PATH but it already exists", env)
 		}
 		repo, err := abspath.New(env)
 		if err != nil {
@@ -102,6 +105,5 @@ func (repo *Repository) Clone() error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-
 	return nil
 }

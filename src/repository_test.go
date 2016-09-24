@@ -3,6 +3,8 @@ package dotfiles
 import (
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -52,8 +54,8 @@ func TestNewRepositoryValidPath(t *testing.T) {
 		r, err := NewRepository("foo", input, false)
 		if err != nil {
 			t.Errorf("Unexpected error on specifying path: %s", err.Error())
-		} else if r.ParentDir != expected {
-			t.Errorf("Expected %s as the parent directory but actually %s", expected, r.ParentDir)
+		} else if !strings.HasSuffix(r.Path.String(), expected) {
+			t.Errorf("Expected %s as the parent directory but actually %s", expected, r.Path)
 		}
 	}
 }
@@ -105,6 +107,48 @@ func TestNewRepositoryInvalidEmptySpec(t *testing.T) {
 	}
 }
 
+func TestNewRepositoryWithEnv(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	repo := filepath.Join(cwd, "_test_dotfiles")
+	os.Setenv("DOTFILES_REPO_PATH", repo)
+	defer os.Setenv("DOTFILES_REPO_PATH", "")
+
+	r, err := NewRepository("rhysd/dogfiles", "", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !r.IncludesRepoDir {
+		t.Errorf("dotfiles always includes its repository name")
+	}
+
+	if r.Path.String() != repo {
+		t.Errorf("Repository must be installed at %s but actually done at %s", repo, r.Path.String())
+	}
+}
+
+func TestNewRepositoryWithInvalidEnv(t *testing.T) {
+	defer os.Setenv("DOTFILES_REPO_PATH", "")
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	os.Setenv("DOTFILES_REPO_PATH", cwd)
+	if _, err := NewRepository("rhysd/dogfiles", "", true); err == nil {
+		t.Fatalf("It must raise an error when repository already exists")
+	}
+
+	os.Setenv("DOTFILES_REPO_PATH", "this_is_relative_path")
+	if _, err := NewRepository("rhysd/dogfiles", "", true); err == nil {
+		t.Fatalf("It must raise an error when relative path is specified in env")
+	}
+}
+
 func TestClone(t *testing.T) {
 	if err := os.MkdirAll("_test_cloned", os.ModeDir|os.ModePerm); err != nil {
 		panic(err.Error())
@@ -140,5 +184,33 @@ func TestClone(t *testing.T) {
 		if !s.IsDir() {
 			t.Fatalf("Cloned repository is not a directory")
 		}
+	}
+}
+
+func TestCloneWithEnv(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	repo := filepath.Join(cwd, "_test_dotfiles")
+	os.Setenv("DOTFILES_REPO_PATH", repo)
+	defer os.Setenv("DOTFILES_REPO_PATH", "")
+
+	r, err := NewRepository("rhysd/dogfiles", "", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := r.Clone(); err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll("_test_dotfiles")
+
+	s, err := os.Stat(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.IsDir() {
+		t.Fatalf("Cloned repository must be a directory: '%s'", repo)
 	}
 }
