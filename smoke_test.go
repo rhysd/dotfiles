@@ -15,7 +15,8 @@ func TestSmoke(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	if err := os.Setenv("DOTFILES_REPO_PATH", cwd); err != nil {
+	repo := filepath.Join(cwd, "dogfiles")
+	if err := os.Setenv("DOTFILES_REPO_PATH", repo); err != nil {
 		panic(err)
 	}
 	user, err := user.Current()
@@ -23,7 +24,7 @@ func TestSmoke(t *testing.T) {
 		panic(err)
 	}
 	home := user.HomeDir
-	defer os.RemoveAll(filepath.Join(cwd, "dogfiles"))
+	defer os.RemoveAll(repo)
 
 	{
 		cmd := exec.Command("./dotfiles", "clone", "--https", "rhysd/dogfiles")
@@ -68,13 +69,13 @@ func TestSmoke(t *testing.T) {
 			from string
 			to   string
 		}{
-			{"npmrc",     filepath.Join(home, ".npmrc")},
-			{"nvimrc",    filepath.Join(home, ".config", "nvim", "init.vim")},
+			{"npmrc", filepath.Join(home, ".npmrc")},
+			{"nvimrc", filepath.Join(home, ".config", "nvim", "init.vim")},
 			{"tmux.conf", filepath.Join(home, ".tmux.conf")},
-			{"peco",      filepath.Join(home, ".config", "peco")},
-			{"vimrc",     filepath.Join(home, ".vimrc")},
-			{"gvimrc",    filepath.Join(home, ".gvimrc")},
-			{"nyaovim",   filepath.Join(home, ".config", "nyaovim")},
+			{"peco", filepath.Join(home, ".config", "peco")},
+			{"vimrc", filepath.Join(home, ".vimrc")},
+			{"gvimrc", filepath.Join(home, ".gvimrc")},
+			{"nyaovim", filepath.Join(home, ".config", "nyaovim")},
 		} {
 			s, err := os.Lstat(l.to)
 			if err != nil {
@@ -140,13 +141,13 @@ func TestSmoke(t *testing.T) {
 			from string
 			to   string
 		}{
-			{"npmrc",     filepath.Join(home, ".npmrc")},
-			{"nvimrc",    filepath.Join(home, ".config", "nvim", "init.vim")},
+			{"npmrc", filepath.Join(home, ".npmrc")},
+			{"nvimrc", filepath.Join(home, ".config", "nvim", "init.vim")},
 			{"tmux.conf", filepath.Join(home, ".tmux.conf")},
-			{"peco",      filepath.Join(home, ".config", "peco")},
-			{"vimrc",     filepath.Join(home, ".vimrc")},
-			{"gvimrc",    filepath.Join(home, ".gvimrc")},
-			{"nyaovim",   filepath.Join(home, ".config", "nyaovim")},
+			{"peco", filepath.Join(home, ".config", "peco")},
+			{"vimrc", filepath.Join(home, ".vimrc")},
+			{"gvimrc", filepath.Join(home, ".gvimrc")},
+			{"nyaovim", filepath.Join(home, ".config", "nyaovim")},
 		} {
 			_, err := os.Lstat(l.to)
 			if err == nil {
