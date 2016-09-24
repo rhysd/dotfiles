@@ -20,3 +20,16 @@ func TestUpdateErrorCase(t *testing.T) {
 		t.Fatalf("If it is not a Git repository, it should raise an error")
 	}
 }
+
+func TestUpdateOk(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	if err := Update(".."); err != nil {
+		t.Fatal(err)
+	}
+	if c, _ := os.Getwd(); c != cwd {
+		t.Fatalf("Current working directory is wrong. '%s' should be '%s'", c, cwd)
+	}
+}
