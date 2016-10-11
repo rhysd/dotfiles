@@ -1,7 +1,6 @@
 `dotfiles` Command
 ==================
-
-**UNDER DEVELOPMENT. PLEASE DO NOT USE THIS YET.**
+[![Build Status](https://travis-ci.org/rhysd/dotfiles.svg?branch=master)](https://travis-ci.org/rhysd/dotfiles)
 
 This repository provides `dotfiles` command to manage your [dotfiles](http://dotfiles.github.io/).  It manages your dotfiles repository and symbolic links to use the configurations.
 
@@ -89,8 +88,7 @@ $ dotfiles update
 
 ## Default Mappings
 
-TODO
-
+It depends on your platform. Please see [source code](src/mappings.go).
 
 ## Symbolic Link Mappings
 
@@ -120,6 +118,7 @@ Below is an example of `.dotfiles/mappings_mac.json`.
 }
 ```
 
+Real world example is [my dotfiles](https://github.com/rhysd/dogfiles/tree/master/.dotfiles).
 
 ## License
 
