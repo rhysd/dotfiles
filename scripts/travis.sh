@@ -4,7 +4,9 @@ set -e
 
 git config --global url.https://github.com/.insteadOf git@github.com:
 echo -e "Host github.com\n\tVerifyHostKeyDNS no\n" >> ~/.ssh/config
+echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 echo -e "Host bitbucket.org\n\tVerifyHostKeyDNS no\n" >> ~/.ssh/config
+echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update
