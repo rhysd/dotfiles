@@ -8,16 +8,20 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update
     brew upgrade go
     go get -t -d -v ./...
-    go test -v ./src/
+    set +e
     go test ./
+    set -e
+    go test -v ./src/
 else
     go get github.com/axw/gocov/gocov
     go get github.com/mattn/goveralls
     go get golang.org/x/tools/cmd/cover
     go get -t -d -v ./...
     go vet
-    cd src/ && go vet && cd -
+    set +e
     go test ./
+    set -e
+    cd src/ && go vet && cd -
     go test -v -coverprofile=coverage.out ./src/
     $HOME/gopath/bin/goveralls -coverprofile coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 fi

@@ -1,6 +1,7 @@
 `dotfiles` Command
 ==================
 [![Build Status](https://travis-ci.org/rhysd/dotfiles.svg?branch=master)](https://travis-ci.org/rhysd/dotfiles)
+[![Coverage Status](https://coveralls.io/repos/github/rhysd/dotfiles/badge.svg?branch=master)](https://coveralls.io/github/rhysd/dotfiles?branch=master)
 
 This repository provides `dotfiles` command to manage your [dotfiles](http://dotfiles.github.io/).  It manages your dotfiles repository and symbolic links to use the configurations.
 
