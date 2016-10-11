@@ -151,7 +151,7 @@ func TestSmoke(t *testing.T) {
 		} {
 			_, err := os.Lstat(l.to)
 			if err == nil {
-				t.Error("Symbolic link '%s' must be removed", l.to)
+				t.Errorf("Symbolic link '%s' must be removed", l.to)
 				continue
 			}
 		}
