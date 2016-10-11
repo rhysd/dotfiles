@@ -3,7 +3,7 @@
 set -e
 
 git config --global url.https://github.com/.insteadOf git@github.com:
-echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+ssh -o "StrictHostKeyChecking=no"
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update
