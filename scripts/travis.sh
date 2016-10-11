@@ -3,10 +3,13 @@
 set -e
 
 git config --global url.https://github.com/.insteadOf git@github.com:
+echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update
+    set +e
     brew upgrade go
+    set -e
     go get -t -d -v ./...
     set +e
     go test ./
