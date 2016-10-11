@@ -3,7 +3,7 @@
 set -e
 
 git config --global url.https://github.com/.insteadOf git@github.com:
-git config --global url.https://bitbucket.org/.insteadOf git@bitbucket.org:
+git config --global url.https://rhysd@bitbucket.org/.insteadOf git@bitbucket.org:
 echo -e "Host github.com\n\tVerifyHostKeyDNS no\n" >> ~/.ssh/config
 echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 echo -e "Host bitbucket.org\n\tVerifyHostKeyDNS no\n" >> ~/.ssh/config
