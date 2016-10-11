@@ -13,7 +13,7 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 else
     go get github.com/axw/gocov/gocov
     go get github.com/mattn/goveralls
-    if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+    go get golang.org/x/tools/cmd/cover
     go get -t -d -v ./...
     go vet
     cd src/ && go vet && cd -
