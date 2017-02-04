@@ -24,6 +24,9 @@ func (err NothingLinkedError) Error() string {
 	}
 }
 
+// A special platform name used commonly for Unix-like platform
+const PLATFORM_UNIX_LIKE = "unixlike"
+
 type Mappings map[string]abspath.AbsPath
 type MappingsJson map[string]string
 
@@ -33,104 +36,62 @@ var DefaultMappings = map[string]MappingsJson{
 		".vim":    "~/vimfiles",
 		".vimrc":  "~/vimfiles/vimrc",
 	},
+	PLATFORM_UNIX_LIKE: MappingsJson{
+		".agignore":      "~/.agignore",
+		".bash_login":    "~/.bash_login",
+		".bash_profile":  "~/.bash_profile",
+		".bashrc":        "~/.bashrc",
+		".emacs.d":       "~/.emacs.d",
+		".emacs.el":      "~/.emacs.d/init.el",
+		".eslintrc":      "~/.eslintrc",
+		".eslintrc.json": "~/.eslintrc.json",
+		".eslintrc.yml":  "~/.eslintrc.yml",
+		".gvimrc":        "~/.gvimrc",
+		".npmrc":         "~/.npmrc",
+		".profile":       "~/.profile",
+		".pryrc":         "~/.pryrc",
+		".pylintrc":      "~/.pylintrc",
+		".tmux.conf":     "~/.tmux.conf",
+		".vim":           "~/.vim",
+		".vimrc":         "~/.vimrc",
+		".zlogin":        "~/.zlogin",
+		".zprofile":      "~/.zprofile",
+		".zshenv":        "~/.zshenv",
+		".zshrc":         "~/.zshrc",
+		"agignore":       "~/.agignore",
+		"bash_login":     "~/.bash_login",
+		"bash_profile":   "~/.bash_profile",
+		"bashrc":         "~/.bashrc",
+		"emacs.d":        "~/.emacs.d",
+		"emacs.el":       "~/.emacs.d/init.el",
+		"eslintrc":       "~/.eslintrc",
+		"eslintrc.json":  "~/.eslintrc.json",
+		"eslintrc.yml":   "~/.eslintrc.yml",
+		"gvimrc":         "~/.gvimrc",
+		"npmrc":          "~/.npmrc",
+		"profile":        "~/.profile",
+		"pryrc":          "~/.pryrc",
+		"pylintrc":       "~/.pylintrc",
+		"tmux.conf":      "~/.tmux.conf",
+		"vim":            "~/.vim",
+		"vimrc":          "~/.vimrc",
+		"zlogin":         "~/.zlogin",
+		"zprofile":       "~/.zprofile",
+		"zshenv":         "~/.zshenv",
+		"zshrc":          "~/.zshrc",
+		"init.el":        "~/.emacs.d/init.el",
+		"peco":           "~/.config/peco",
+	},
 	"linux": MappingsJson{
 		".Xmodmap":       "~/.Xmodmap",
 		".Xresources":    "~/.Xresources",
-		".agignore":      "~/.agignore",
-		".bash_login":    "~/.bash_login",
-		".bash_profile":  "~/.bash_profile",
-		".bashrc":        "~/.bashrc",
-		".emacs.d":       "~/.emacs.d",
-		".emacs.el":      "~/.emacs.d/init.el",
-		".eslintrc":      "~/.eslintrc",
-		".eslintrc.json": "~/.eslintrc.json",
-		".eslintrc.yml":  "~/.eslintrc.yml",
-		".gvimrc":        "~/.gvimrc",
-		".npmrc":         "~/.npmrc",
-		".profile":       "~/.profile",
-		".pryrc":         "~/.pryrc",
-		".pylintrc":      "~/.pylintrc",
-		".tmux.conf":     "~/.tmux.conf",
-		".vim":           "~/.vim",
-		".vimrc":         "~/.vimrc",
-		".zlogin":        "~/.zlogin",
-		".zprofile":      "~/.zprofile",
-		".zshenv":        "~/.zshenv",
-		".zshrc":         "~/.zshrc",
 		"Xmodmap":        "~/.Xmodmap",
 		"Xresources":     "~/.Xresources",
-		"agignore":       "~/.agignore",
-		"bash_login":     "~/.bash_login",
-		"bash_profile":   "~/.bash_profile",
-		"bashrc":         "~/.bashrc",
-		"emacs.d":        "~/.emacs.d",
-		"emacs.el":       "~/.emacs.d/init.el",
-		"eslintrc":       "~/.eslintrc",
-		"eslintrc.json":  "~/.eslintrc.json",
-		"eslintrc.yml":   "~/.eslintrc.yml",
-		"gvimrc":         "~/.gvimrc",
-		"npmrc":          "~/.npmrc",
-		"profile":        "~/.profile",
-		"pryrc":          "~/.pryrc",
-		"pylintrc":       "~/.pylintrc",
-		"tmux.conf":      "~/.tmux.conf",
-		"vim":            "~/.vim",
-		"vimrc":          "~/.vimrc",
-		"zlogin":         "~/.zlogin",
-		"zprofile":       "~/.zprofile",
-		"zshenv":         "~/.zshenv",
-		"zshrc":          "~/.zshrc",
-		"init.el":        "~/.emacs.d/init.el",
-		"peco":           "~/.config/peco",
 		"rc.lua":         "~/.config/rc.lua",
 	},
 	"darwin": MappingsJson{
-		".agignore":      "~/.agignore",
-		".bash_login":    "~/.bash_login",
-		".bash_profile":  "~/.bash_profile",
-		".bashrc":        "~/.bashrc",
-		".emacs.d":       "~/.emacs.d",
-		".emacs.el":      "~/.emacs.d/init.el",
-		".eslintrc":      "~/.eslintrc",
-		".eslintrc.json": "~/.eslintrc.json",
-		".eslintrc.yml":  "~/.eslintrc.yml",
-		".gvimrc":        "~/.gvimrc",
 		".htoprc":        "~/.htoprc",
-		".npmrc":         "~/.npmrc",
-		".profile":       "~/.profile",
-		".pryrc":         "~/.pryrc",
-		".pylintrc":      "~/.pylintrc",
-		".tmux.conf":     "~/.tmux.conf",
-		".vim":           "~/.vim",
-		".vimrc":         "~/.vimrc",
-		".zlogin":        "~/.zlogin",
-		".zprofile":      "~/.zprofile",
-		".zshenv":        "~/.zshenv",
-		".zshrc":         "~/.zshrc",
-		"agignore":       "~/.agignore",
-		"bash_login":     "~/.bash_login",
-		"bash_profile":   "~/.bash_profile",
-		"bashrc":         "~/.bashrc",
-		"emacs.d":        "~/.emacs.d",
-		"emacs.el":       "~/.emacs.d/init.el",
-		"eslintrc":       "~/.eslintrc",
-		"eslintrc.json":  "~/.eslintrc.json",
-		"eslintrc.yml":   "~/.eslintrc.yml",
-		"gvimrc":         "~/.gvimrc",
 		"htoprc":         "~/.htoprc",
-		"npmrc":          "~/.npmrc",
-		"profile":        "~/.profile",
-		"pryrc":          "~/.pryrc",
-		"pylintrc":       "~/.pylintrc",
-		"tmux.conf":      "~/.tmux.conf",
-		"vim":            "~/.vim",
-		"vimrc":          "~/.vimrc",
-		"zlogin":         "~/.zlogin",
-		"zprofile":       "~/.zprofile",
-		"zshenv":         "~/.zshenv",
-		"zshrc":          "~/.zshrc",
-		"init.el":        "~/.emacs.d/init.el",
-		"peco":           "~/.config/peco",
 	},
 }
 
@@ -176,7 +137,20 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 	return m, nil
 }
 
-func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
+func mergeMappingsFromDefault(dist Mappings, platform string) error {
+	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
+	if err != nil {
+		return err
+	}
+
+	for k, v := range m {
+		dist[k] = v
+	}
+
+	return nil
+}
+
+func mergeMappingsFromFile(dist Mappings, file abspath.AbsPath) error {
 	j, err := parseMappingsJson(file)
 	if err != nil {
 		return err
@@ -191,26 +165,38 @@ func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 	}
 
 	for k, v := range m {
-		(*dist)[k] = v
+		dist[k] = v
 	}
 
 	return nil
 }
 
+func isUnixLikePlatform(platform string) bool {
+	return platform == "linux" || platform == "darwin"
+}
+
 func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, error) {
-	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
-	if err != nil {
+	m := Mappings{}
+
+	if isUnixLikePlatform(platform) {
+		if err := mergeMappingsFromDefault(m, PLATFORM_UNIX_LIKE); err != nil {
+			return nil, err
+		}
+	}
+	if err := mergeMappingsFromDefault(m, platform); err != nil {
 		return nil, err
 	}
-	if m == nil {
-		m = Mappings{}
-	}
 
-	if err := mergeMappingsFromFile(&m, parent.Join("mappings.json")); err != nil {
+	if err := mergeMappingsFromFile(m, parent.Join("mappings.json")); err != nil {
 		return nil, err
 	}
 
-	if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
+	if isUnixLikePlatform(platform) {
+		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", PLATFORM_UNIX_LIKE))); err != nil {
+			return nil, err
+		}
+	}
+	if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
 		return nil, err
 	}
 
