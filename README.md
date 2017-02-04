@@ -107,10 +107,10 @@ Below is an example of `mappings.json`.  You can use `~` to represent a home dir
 In addition, you can define platform specific mappings with below mappings JSON files.
 
 - `.dotfiles/mappings_linux.json`: Will link the mappings in Linux.
-- `.dotfiles/mappings_mac.json`: Will link the mappings in macOS.
+- `.dotfiles/mappings_darwin.json`: Will link the mappings in macOS.
 - `.dotfiles/mappings_windows.json`: Will link the mappings in Windows.
 
-Below is an example of `.dotfiles/mappings_mac.json`.
+Below is an example of `.dotfiles/mappings_darwin.json`.
 
 ```json
 {
