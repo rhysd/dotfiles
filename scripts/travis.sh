@@ -30,6 +30,8 @@ else
     set -e
     cd src/ && go vet && cd -
     go test -v -coverprofile=coverage.out ./src/
-    $HOME/gopath/bin/goveralls -coverprofile coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+    if [[ "$COVERALLS_TOKEN" != "" ]]; then
+        $HOME/gopath/bin/goveralls -coverprofile coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+    fi
 fi
 
