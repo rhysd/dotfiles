@@ -137,20 +137,20 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 	return m, nil
 }
 
-func mergeMappingsFromDefault(dist *Mappings, platform string) error {
+func mergeMappingsFromDefault(dist Mappings, platform string) error {
 	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
 	if err != nil {
 		return err
 	}
 
 	for k, v := range m {
-		(*dist)[k] = v
+		dist[k] = v
 	}
 
 	return nil
 }
 
-func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
+func mergeMappingsFromFile(dist Mappings, file abspath.AbsPath) error {
 	j, err := parseMappingsJson(file)
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 	}
 
 	for k, v := range m {
-		(*dist)[k] = v
+		dist[k] = v
 	}
 
 	return nil
@@ -179,24 +179,24 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	m := Mappings{}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromDefault(&m, PLATFORM_UNIX_LIKE); err != nil {
+		if err := mergeMappingsFromDefault(m, PLATFORM_UNIX_LIKE); err != nil {
 			return nil, err
 		}
 	}
-	if err := mergeMappingsFromDefault(&m, platform); err != nil {
+	if err := mergeMappingsFromDefault(m, platform); err != nil {
 		return nil, err
 	}
 
-	if err := mergeMappingsFromFile(&m, parent.Join("mappings.json")); err != nil {
+	if err := mergeMappingsFromFile(m, parent.Join("mappings.json")); err != nil {
 		return nil, err
 	}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", PLATFORM_UNIX_LIKE))); err != nil {
+		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", PLATFORM_UNIX_LIKE))); err != nil {
 			return nil, err
 		}
 	}
-	if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
+	if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
 		return nil, err
 	}
 
