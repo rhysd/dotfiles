@@ -24,6 +24,9 @@ func (err NothingLinkedError) Error() string {
 	}
 }
 
+// A special platform name used commonly for Unix-like platform
+const PLATFORM_UNIX_LIKE = "unixlike"
+
 type Mappings map[string]abspath.AbsPath
 type MappingsJson map[string]string
 
@@ -33,7 +36,7 @@ var DefaultMappings = map[string]MappingsJson{
 		".vim":    "~/vimfiles",
 		".vimrc":  "~/vimfiles/vimrc",
 	},
-	"unix": MappingsJson{
+	PLATFORM_UNIX_LIKE: MappingsJson{
 		".agignore":      "~/.agignore",
 		".bash_login":    "~/.bash_login",
 		".bash_profile":  "~/.bash_profile",
@@ -176,7 +179,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	m := Mappings{}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromDefault(&m, "unix"); err != nil {
+		if err := mergeMappingsFromDefault(&m, PLATFORM_UNIX_LIKE); err != nil {
 			return nil, err
 		}
 	}
@@ -189,7 +192,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromFile(&m, parent.Join("mappings_unix.json")); err != nil {
+		if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", PLATFORM_UNIX_LIKE))); err != nil {
 			return nil, err
 		}
 	}

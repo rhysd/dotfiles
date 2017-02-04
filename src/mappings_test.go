@@ -167,7 +167,7 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 }
 
 func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
-	createTestJson("mappings_unix.json", `
+	createTestJson("mappings_unixlike.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/hidden/path/vimrc"
@@ -190,7 +190,7 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 		t.Fatal(err)
 	}
 	if m["some_file"].String() != "/path/to/some_file" {
-		t.Errorf("Mapping value set in mappings_unix.json is wrong: '%s' in Darwin", m["some_file"])
+		t.Errorf("Mapping value set in mappings_unixlike.json is wrong: '%s' in Darwin", m["some_file"])
 	}
 	if m[".vimrc"].String() != "/override/path/vimrc" {
 		t.Errorf("Mapping should be overridden by mappings_darwin.json but actually '%s'", m[".vimrc"])
