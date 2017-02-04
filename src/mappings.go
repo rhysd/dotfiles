@@ -27,110 +27,73 @@ func (err NothingLinkedError) Error() string {
 type Mappings map[string]abspath.AbsPath
 type MappingsJson map[string]string
 
+var isUnixPlatform = map[string]bool{
+	"linux": true,
+	"darwin": true,
+}
+
 var DefaultMappings = map[string]MappingsJson{
 	"windows": MappingsJson{
 		".gvimrc": "~/vimfiles/gvimrc",
 		".vim":    "~/vimfiles",
 		".vimrc":  "~/vimfiles/vimrc",
 	},
+	"unix": MappingsJson{
+		".agignore":      "~/.agignore",
+		".bash_login":    "~/.bash_login",
+		".bash_profile":  "~/.bash_profile",
+		".bashrc":        "~/.bashrc",
+		".emacs.d":       "~/.emacs.d",
+		".emacs.el":      "~/.emacs.d/init.el",
+		".eslintrc":      "~/.eslintrc",
+		".eslintrc.json": "~/.eslintrc.json",
+		".eslintrc.yml":  "~/.eslintrc.yml",
+		".gvimrc":        "~/.gvimrc",
+		".npmrc":         "~/.npmrc",
+		".profile":       "~/.profile",
+		".pryrc":         "~/.pryrc",
+		".pylintrc":      "~/.pylintrc",
+		".tmux.conf":     "~/.tmux.conf",
+		".vim":           "~/.vim",
+		".vimrc":         "~/.vimrc",
+		".zlogin":        "~/.zlogin",
+		".zprofile":      "~/.zprofile",
+		".zshenv":        "~/.zshenv",
+		".zshrc":         "~/.zshrc",
+		"agignore":       "~/.agignore",
+		"bash_login":     "~/.bash_login",
+		"bash_profile":   "~/.bash_profile",
+		"bashrc":         "~/.bashrc",
+		"emacs.d":        "~/.emacs.d",
+		"emacs.el":       "~/.emacs.d/init.el",
+		"eslintrc":       "~/.eslintrc",
+		"eslintrc.json":  "~/.eslintrc.json",
+		"eslintrc.yml":   "~/.eslintrc.yml",
+		"gvimrc":         "~/.gvimrc",
+		"npmrc":          "~/.npmrc",
+		"profile":        "~/.profile",
+		"pryrc":          "~/.pryrc",
+		"pylintrc":       "~/.pylintrc",
+		"tmux.conf":      "~/.tmux.conf",
+		"vim":            "~/.vim",
+		"vimrc":          "~/.vimrc",
+		"zlogin":         "~/.zlogin",
+		"zprofile":       "~/.zprofile",
+		"zshenv":         "~/.zshenv",
+		"zshrc":          "~/.zshrc",
+		"init.el":        "~/.emacs.d/init.el",
+		"peco":           "~/.config/peco",
+	},
 	"linux": MappingsJson{
 		".Xmodmap":       "~/.Xmodmap",
 		".Xresources":    "~/.Xresources",
-		".agignore":      "~/.agignore",
-		".bash_login":    "~/.bash_login",
-		".bash_profile":  "~/.bash_profile",
-		".bashrc":        "~/.bashrc",
-		".emacs.d":       "~/.emacs.d",
-		".emacs.el":      "~/.emacs.d/init.el",
-		".eslintrc":      "~/.eslintrc",
-		".eslintrc.json": "~/.eslintrc.json",
-		".eslintrc.yml":  "~/.eslintrc.yml",
-		".gvimrc":        "~/.gvimrc",
-		".npmrc":         "~/.npmrc",
-		".profile":       "~/.profile",
-		".pryrc":         "~/.pryrc",
-		".pylintrc":      "~/.pylintrc",
-		".tmux.conf":     "~/.tmux.conf",
-		".vim":           "~/.vim",
-		".vimrc":         "~/.vimrc",
-		".zlogin":        "~/.zlogin",
-		".zprofile":      "~/.zprofile",
-		".zshenv":        "~/.zshenv",
-		".zshrc":         "~/.zshrc",
 		"Xmodmap":        "~/.Xmodmap",
 		"Xresources":     "~/.Xresources",
-		"agignore":       "~/.agignore",
-		"bash_login":     "~/.bash_login",
-		"bash_profile":   "~/.bash_profile",
-		"bashrc":         "~/.bashrc",
-		"emacs.d":        "~/.emacs.d",
-		"emacs.el":       "~/.emacs.d/init.el",
-		"eslintrc":       "~/.eslintrc",
-		"eslintrc.json":  "~/.eslintrc.json",
-		"eslintrc.yml":   "~/.eslintrc.yml",
-		"gvimrc":         "~/.gvimrc",
-		"npmrc":          "~/.npmrc",
-		"profile":        "~/.profile",
-		"pryrc":          "~/.pryrc",
-		"pylintrc":       "~/.pylintrc",
-		"tmux.conf":      "~/.tmux.conf",
-		"vim":            "~/.vim",
-		"vimrc":          "~/.vimrc",
-		"zlogin":         "~/.zlogin",
-		"zprofile":       "~/.zprofile",
-		"zshenv":         "~/.zshenv",
-		"zshrc":          "~/.zshrc",
-		"init.el":        "~/.emacs.d/init.el",
-		"peco":           "~/.config/peco",
 		"rc.lua":         "~/.config/rc.lua",
 	},
 	"darwin": MappingsJson{
-		".agignore":      "~/.agignore",
-		".bash_login":    "~/.bash_login",
-		".bash_profile":  "~/.bash_profile",
-		".bashrc":        "~/.bashrc",
-		".emacs.d":       "~/.emacs.d",
-		".emacs.el":      "~/.emacs.d/init.el",
-		".eslintrc":      "~/.eslintrc",
-		".eslintrc.json": "~/.eslintrc.json",
-		".eslintrc.yml":  "~/.eslintrc.yml",
-		".gvimrc":        "~/.gvimrc",
 		".htoprc":        "~/.htoprc",
-		".npmrc":         "~/.npmrc",
-		".profile":       "~/.profile",
-		".pryrc":         "~/.pryrc",
-		".pylintrc":      "~/.pylintrc",
-		".tmux.conf":     "~/.tmux.conf",
-		".vim":           "~/.vim",
-		".vimrc":         "~/.vimrc",
-		".zlogin":        "~/.zlogin",
-		".zprofile":      "~/.zprofile",
-		".zshenv":        "~/.zshenv",
-		".zshrc":         "~/.zshrc",
-		"agignore":       "~/.agignore",
-		"bash_login":     "~/.bash_login",
-		"bash_profile":   "~/.bash_profile",
-		"bashrc":         "~/.bashrc",
-		"emacs.d":        "~/.emacs.d",
-		"emacs.el":       "~/.emacs.d/init.el",
-		"eslintrc":       "~/.eslintrc",
-		"eslintrc.json":  "~/.eslintrc.json",
-		"eslintrc.yml":   "~/.eslintrc.yml",
-		"gvimrc":         "~/.gvimrc",
 		"htoprc":         "~/.htoprc",
-		"npmrc":          "~/.npmrc",
-		"profile":        "~/.profile",
-		"pryrc":          "~/.pryrc",
-		"pylintrc":       "~/.pylintrc",
-		"tmux.conf":      "~/.tmux.conf",
-		"vim":            "~/.vim",
-		"vimrc":          "~/.vimrc",
-		"zlogin":         "~/.zlogin",
-		"zprofile":       "~/.zprofile",
-		"zshenv":         "~/.zshenv",
-		"zshrc":          "~/.zshrc",
-		"init.el":        "~/.emacs.d/init.el",
-		"peco":           "~/.config/peco",
 	},
 }
 
@@ -176,6 +139,19 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 	return m, nil
 }
 
+func mergeMappingsFromDefault(dist *Mappings, platform string) error {
+	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
+	if err != nil {
+		return err
+	}
+
+	for k, v := range m {
+		(*dist)[k] = v
+	}
+
+	return nil
+}
+
 func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 	j, err := parseMappingsJson(file)
 	if err != nil {
@@ -198,18 +174,26 @@ func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 }
 
 func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, error) {
-	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
-	if err != nil {
-		return nil, err
+	m := Mappings{}
+
+	if isUnixPlatform[platform] {
+		if err := mergeMappingsFromDefault(&m, "unix"); err != nil {
+			return nil, err
+		}
 	}
-	if m == nil {
-		m = Mappings{}
+	if err := mergeMappingsFromDefault(&m, platform); err != nil {
+		return nil, err
 	}
 
 	if err := mergeMappingsFromFile(&m, parent.Join("mappings.json")); err != nil {
 		return nil, err
 	}
 
+	if isUnixPlatform[platform] {
+		if err := mergeMappingsFromFile(&m, parent.Join("mappings_unix.json")); err != nil {
+			return nil, err
+		}
+	}
 	if err := mergeMappingsFromFile(&m, parent.Join(fmt.Sprintf("mappings_%s.json", platform))); err != nil {
 		return nil, err
 	}
