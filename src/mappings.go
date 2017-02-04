@@ -27,11 +27,6 @@ func (err NothingLinkedError) Error() string {
 type Mappings map[string]abspath.AbsPath
 type MappingsJson map[string]string
 
-var isUnixPlatform = map[string]bool{
-	"linux": true,
-	"darwin": true,
-}
-
 var DefaultMappings = map[string]MappingsJson{
 	"windows": MappingsJson{
 		".gvimrc": "~/vimfiles/gvimrc",
@@ -173,10 +168,14 @@ func mergeMappingsFromFile(dist *Mappings, file abspath.AbsPath) error {
 	return nil
 }
 
+func isUnixLikePlatform(platform string) bool {
+	return platform == "linux" || platform == "darwin"
+}
+
 func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, error) {
 	m := Mappings{}
 
-	if isUnixPlatform[platform] {
+	if isUnixLikePlatform(platform) {
 		if err := mergeMappingsFromDefault(&m, "unix"); err != nil {
 			return nil, err
 		}
@@ -189,7 +188,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 		return nil, err
 	}
 
-	if isUnixPlatform[platform] {
+	if isUnixLikePlatform(platform) {
 		if err := mergeMappingsFromFile(&m, parent.Join("mappings_unix.json")); err != nil {
 			return nil, err
 		}
