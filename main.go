@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/blang/semver"
 	"github.com/rhysd/dotfiles/src"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
@@ -30,8 +32,8 @@ var (
 	update      = cli.Command("update", "Update your dotfiles repository")
 	update_repo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
-	version = cli.Command("version", "Show version")
-	update  = cli.Command("selfupdate", "Show version")
+	version    = cli.Command("version", "Show version")
+	updateSelf = cli.Command("selfupdate", "Show version")
 )
 
 func unimplemented(cmd string) {
@@ -48,7 +50,7 @@ func handleError(err error) {
 	}
 }
 
-func selfUpdate() int {
+func selfUpdate() {
 	v := semver.MustParse(dotfiles.Version())
 
 	latest, err := selfupdate.UpdateSelf(v, "rhysd/dotfiles")
@@ -78,7 +80,7 @@ func main() {
 		handleError(dotfiles.Update(*update_repo))
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
-	case update.FullCommand():
+	case updateSelf.FullCommand():
 		selfUpdate()
 	default:
 		panic("Internal error: Unreachable! Please report this to https://github.com/rhysd/dotfiles/issues")
