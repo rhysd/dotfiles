@@ -87,6 +87,14 @@ $ dotfiles clean
 $ dotfiles update
 ```
 
+### `selfupdate` subcommand
+
+Update `dotfiles` binary (or `dotfiles.exe` on Windows) itself.
+
+```sh
+$ dotfiles selfupdate
+```
+
 ## Default Mappings
 
 It depends on your platform. Please see [source code](src/mappings.go).

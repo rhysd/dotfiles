@@ -31,6 +31,7 @@ var (
 	update_repo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
 	version = cli.Command("version", "Show version")
+	update  = cli.Command("selfupdate", "Show version")
 )
 
 func unimplemented(cmd string) {
@@ -44,6 +45,22 @@ func handleError(err error) {
 		os.Exit(113)
 	} else {
 		os.Exit(0)
+	}
+}
+
+func selfUpdate() int {
+	v := semver.MustParse(dotfiles.Version())
+
+	latest, err := selfupdate.UpdateSelf(v, "rhysd/dotfiles")
+	if err != nil {
+		handleError(err)
+	}
+
+	if v.Equals(latest.Version) {
+		fmt.Println("Current version", v, "is the latest")
+	} else {
+		fmt.Println("Successfully updated to version", v)
+		fmt.Println("Release Note:\n", latest.ReleaseNotes)
 	}
 }
 
@@ -61,6 +78,8 @@ func main() {
 		handleError(dotfiles.Update(*update_repo))
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
+	case update.FullCommand():
+		selfUpdate()
 	default:
 		panic("Internal error: Unreachable! Please report this to https://github.com/rhysd/dotfiles/issues")
 	}
