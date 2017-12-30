@@ -7,8 +7,13 @@ mkdir -p release
 mv dotfiles_* release/
 cd release
 for bin in `ls`; do
-    mv "$bin" dotfiles
-    zip "${bin}.zip" dotfiles
-    rm dotfiles
+    if [[ "$bin" == *windows* ]]; then
+        command="dotfiles.exe"
+    else
+        command="dotfiles"
+    fi
+    mv "$bin" "$command"
+    zip "${bin}.zip" "$command"
+    rm "$command"
 done
 cd -
