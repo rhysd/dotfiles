@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	cli = kingpin.New("dotfiles", "A dotfiles manager")
+	cli = kingpin.New("dotfiles", "A dotfiles symlinks manager")
 
 	clone       = cli.Command("clone", "Clone remote repository")
 	clone_repo  = clone.Arg("repository", "Repository.  Format: 'user', 'user/repo-name', 'git@somewhere.com:repo.git, 'https://somewhere.com/repo.git'").Required().String()
@@ -40,7 +40,7 @@ func unimplemented(cmd string) {
 	fmt.Fprintf(os.Stderr, "Command '%s' is not implemented yet!\n", cmd)
 }
 
-func handleError(err error) {
+func exit(err error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 		// Note: Exit code is detemined with looking http://tldp.org/LDP/abs/html/exitcodes.html
@@ -55,7 +55,7 @@ func selfUpdate() {
 
 	latest, err := selfupdate.UpdateSelf(v, "rhysd/dotfiles")
 	if err != nil {
-		handleError(err)
+		exit(err)
 	}
 
 	if v.Equals(latest.Version) {
@@ -69,15 +69,15 @@ func selfUpdate() {
 func main() {
 	switch kingpin.MustParse(cli.Parse(os.Args[1:])) {
 	case clone.FullCommand():
-		handleError(dotfiles.Clone(*clone_repo, *clone_path, *clone_https))
+		exit(dotfiles.Clone(*clone_repo, *clone_path, *clone_https))
 	case link.FullCommand():
-		handleError(dotfiles.Link(*link_repo, *link_specified, *link_dryrun))
+		exit(dotfiles.Link(*link_repo, *link_specified, *link_dryrun))
 	case list.FullCommand():
-		handleError(dotfiles.List(*list_repo))
+		exit(dotfiles.List(*list_repo))
 	case clean.FullCommand():
-		handleError(dotfiles.Clean(*clean_repo))
+		exit(dotfiles.Clean(*clean_repo))
 	case update.FullCommand():
-		handleError(dotfiles.Update(*update_repo))
+		exit(dotfiles.Update(*update_repo))
 	case version.FullCommand():
 		fmt.Println(dotfiles.Version())
 	case updateSelf.FullCommand():

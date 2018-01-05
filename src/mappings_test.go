@@ -409,12 +409,12 @@ func TestLinkSourceNotExist(t *testing.T) {
 	m := mapping(".unknown.conf", "never_created.conf")
 	err := m.CreateAllLinks(false)
 	if _, ok := err.(*NothingLinkedError); !ok {
-		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
+		t.Errorf("Not existing file must be ignored but actually error occurred: %s", err.Error())
 	}
 	m2 := mapping("unknown.conf", "never_created.conf")
 	err = m2.CreateSomeLinks([]string{"unknown.conf"}, false)
 	if _, ok := err.(*NothingLinkedError); !ok {
-		t.Errorf("Not existing file must be ignored but actually error occured: %s", err.Error())
+		t.Errorf("Not existing file must be ignored but actually error occurred: %s", err.Error())
 	}
 }
 
