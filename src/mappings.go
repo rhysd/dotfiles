@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/rhysd/abspath"
 )
 
@@ -233,7 +234,7 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 		return false, err
 	}
 
-	fmt.Printf("Link:  '%s' -> '%s'\n", from, to.String())
+	color.Cyan("Link:  '%s' -> '%s'\n", from, to.String())
 
 	if dry {
 		return true, nil
