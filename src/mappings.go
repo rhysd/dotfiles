@@ -83,15 +83,15 @@ var DefaultMappings = map[string]MappingsJson{
 		"peco":           "~/.config/peco",
 	},
 	"linux": MappingsJson{
-		".Xmodmap":       "~/.Xmodmap",
-		".Xresources":    "~/.Xresources",
-		"Xmodmap":        "~/.Xmodmap",
-		"Xresources":     "~/.Xresources",
-		"rc.lua":         "~/.config/rc.lua",
+		".Xmodmap":    "~/.Xmodmap",
+		".Xresources": "~/.Xresources",
+		"Xmodmap":     "~/.Xmodmap",
+		"Xresources":  "~/.Xresources",
+		"rc.lua":      "~/.config/rc.lua",
 	},
 	"darwin": MappingsJson{
-		".htoprc":        "~/.htoprc",
-		"htoprc":         "~/.htoprc",
+		".htoprc": "~/.htoprc",
+		"htoprc":  "~/.htoprc",
 	},
 }
 
