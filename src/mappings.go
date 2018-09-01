@@ -320,7 +320,7 @@ func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 		return false, err
 	}
 
-	fmt.Printf("Removed symlink: '%s' -> '%s'\n", source, to.String())
+	fmt.Printf("Unlink: '%s' -> '%s'\n", source, to.String())
 
 	return true, nil
 }
