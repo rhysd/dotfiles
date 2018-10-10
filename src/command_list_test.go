@@ -10,14 +10,14 @@ import (
 )
 
 func TestListEmptyList(t *testing.T) {
-	stdout_saved := os.Stdout
+	stdoutSaved := os.Stdout
 	r, w, err := os.Pipe()
 	if err != nil {
 		panic(err)
 	}
 	os.Stdout = w
 	defer func() {
-		os.Stdout = stdout_saved
+		os.Stdout = stdoutSaved
 	}()
 
 	if err := List("."); err != nil {
@@ -34,14 +34,14 @@ func TestListEmptyList(t *testing.T) {
 }
 
 func TestExistingMapping(t *testing.T) {
-	stdout_saved := os.Stdout
+	stdoutSaved := os.Stdout
 	r, w, err := os.Pipe()
 	if err != nil {
 		panic(err)
 	}
 	os.Stdout = w
 	defer func() {
-		os.Stdout = stdout_saved
+		os.Stdout = stdoutSaved
 	}()
 
 	cwd, err := os.Getwd()
@@ -49,7 +49,7 @@ func TestExistingMapping(t *testing.T) {
 		panic(err)
 	}
 
-	dist_conf := filepath.Join(cwd, "_dist.conf")
+	distConf := filepath.Join(cwd, "_dist.conf")
 	dir := filepath.Join(cwd, ".dotfiles")
 	if err := os.MkdirAll(dir, os.ModePerm|os.ModeDir); err != nil {
 		panic(err)
@@ -63,7 +63,7 @@ func TestExistingMapping(t *testing.T) {
 
 	_, err = f.WriteString(`
 	{
-		"_source.conf": "` + dist_conf + `"
+		"_source.conf": "` + distConf + `"
 	}
 	`)
 	if err != nil {
@@ -82,10 +82,10 @@ func TestExistingMapping(t *testing.T) {
 	}
 	g.Close()
 
-	if err := os.Symlink(source, dist_conf); err != nil {
+	if err := os.Symlink(source, distConf); err != nil {
 		panic(err)
 	}
-	defer os.Remove(dist_conf)
+	defer os.Remove(distConf)
 
 	if err := List(""); err != nil {
 		t.Fatal(err)
@@ -100,7 +100,7 @@ func TestExistingMapping(t *testing.T) {
 	if !strings.Contains(s, source) {
 		t.Errorf("Output must contains source file path: '%s'", s)
 	}
-	if !strings.Contains(s, dist_conf) {
+	if !strings.Contains(s, distConf) {
 		t.Errorf("Output must contains dist symlink path: '%s'", s)
 	}
 }

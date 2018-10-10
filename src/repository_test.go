@@ -23,14 +23,14 @@ func fullPath(entry string) string {
 func TestNewRepositoryInvalidPath(t *testing.T) {
 	var err error
 
-	error_cases := []string{
+	errorCases := []string{
 		"LICENSE.txt",
 		fullPath("LICENSE.txt"),
 		"unknown",
 		fullPath("unknown"),
 	}
 
-	for _, i := range error_cases {
+	for _, i := range errorCases {
 		_, err = NewRepository("foo", i, false)
 		if err == nil {
 			t.Errorf("Error was expected with invalid input to <path>:%s", i)
@@ -44,13 +44,13 @@ func TestNewRepositoryValidPath(t *testing.T) {
 	}
 	defer os.Remove("_test_directory")
 
-	success_cases := map[string]string{
+	successCases := map[string]string{
 		"":                          getwd(),
 		"_test_directory":           "_test_directory",
 		fullPath("_test_directory"): fullPath("_test_directory"),
 	}
 
-	for input, expected := range success_cases {
+	for input, expected := range successCases {
 		r, err := NewRepository("foo", input, false)
 		if err != nil {
 			t.Errorf("Unexpected error on specifying path: %s", err.Error())
@@ -61,7 +61,7 @@ func TestNewRepositoryValidPath(t *testing.T) {
 }
 
 func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
-	success_cases := map[string]string{
+	successCases := map[string]string{
 		"rhysd":                                 "git@github.com:rhysd/dotfiles.git",
 		"rhysd/foobar":                          "git@github.com:rhysd/foobar.git",
 		"https://github.com/rhysd/dogfiles.git": "https://github.com/rhysd/dogfiles.git",
@@ -70,7 +70,7 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 		"git@bitbucket.com:rhysd/dotfiles":      "git@bitbucket.com:rhysd/dotfiles.git",
 	}
 
-	for input, expected := range success_cases {
+	for input, expected := range successCases {
 		r, err := NewRepository(input, "", false)
 		if err != nil {
 			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())
@@ -82,14 +82,14 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 }
 
 func TestNewRepositoryWithHttps(t *testing.T) {
-	success_cases := map[string]string{
+	successCases := map[string]string{
 		"rhysd":                                 "https://github.com/rhysd/dotfiles.git",
 		"rhysd/foobar":                          "https://github.com/rhysd/foobar.git",
 		"https://github.com/rhysd/dogfiles.git": "https://github.com/rhysd/dogfiles.git",
 		"git@bitbucket.com:rhysd/dotfiles.git":  "git@bitbucket.com:rhysd/dotfiles.git",
 	}
 
-	for input, expected := range success_cases {
+	for input, expected := range successCases {
 		r, err := NewRepository(input, "", true)
 		if err != nil {
 			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())

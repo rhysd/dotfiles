@@ -1,7 +1,7 @@
 package dotfiles
 
-func Clean(repo_input string) error {
-	repo, err := absolutePathToRepo(repo_input)
+func Clean(repoInput string) error {
+	repo, err := absolutePathToRepo(repoInput)
 	if err != nil {
 		return err
 	}

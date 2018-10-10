@@ -12,7 +12,7 @@ func TestLinkAll(t *testing.T) {
 		panic(err)
 	}
 
-	dist_conf := path.Join(cwd, "_dist.conf")
+	distConf := path.Join(cwd, "_dist.conf")
 	dir := path.Join(cwd, ".dotfiles")
 	if err := os.MkdirAll(dir, os.ModePerm|os.ModeDir); err != nil {
 		panic(err)
@@ -26,7 +26,7 @@ func TestLinkAll(t *testing.T) {
 
 	_, err = f.WriteString(`
 	{
-		"_source.conf": "` + dist_conf + `"
+		"_source.conf": "` + distConf + `"
 	}
 	`)
 	if err != nil {
@@ -60,7 +60,7 @@ func TestLinkSome(t *testing.T) {
 		panic(err)
 	}
 
-	dist_conf := path.Join(cwd, "_dist.conf")
+	distConf := path.Join(cwd, "_dist.conf")
 	dir := path.Join(cwd, ".dotfiles")
 	if err := os.MkdirAll(dir, os.ModePerm|os.ModeDir); err != nil {
 		panic(err)
@@ -76,7 +76,7 @@ func TestLinkSome(t *testing.T) {
 
 	_, err = f.WriteString(`
 	{
-		"_source.conf": "` + dist_conf + `",
+		"_source.conf": "` + distConf + `",
 		"_tmp.conf": "/path/to/somewhere"
 	}
 	`)

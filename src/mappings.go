@@ -204,8 +204,8 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	return m, nil
 }
 
-func GetMappings(config_dir abspath.AbsPath) (Mappings, error) {
-	return GetMappingsForPlatform(runtime.GOOS, config_dir)
+func GetMappings(configDir abspath.AbsPath) (Mappings, error) {
+	return GetMappingsForPlatform(runtime.GOOS, configDir)
 }
 
 func fileExists(file string) bool {

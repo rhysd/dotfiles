@@ -5,8 +5,8 @@ import (
 	"os/exec"
 )
 
-func Update(repo_input string) error {
-	repo, err := absolutePathToRepo(repo_input)
+func Update(repoInput string) error {
+	repo, err := absolutePathToRepo(repoInput)
 	if err != nil {
 		return err
 	}
