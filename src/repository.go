@@ -9,9 +9,10 @@ import (
 	"github.com/rhysd/abspath"
 )
 
+// Repository represents a repository on local filesystem
 // TODO: Enable to specify branch name?
 type Repository struct {
-	Url             string
+	URL             string
 	Path            abspath.AbsPath
 	IncludesRepoDir bool
 }
@@ -81,7 +82,7 @@ func NewRepository(spec, specified string, https bool) (*Repository, error) {
 }
 
 func (repo *Repository) Clone() error {
-	args := []string{"clone", repo.Url}
+	args := []string{"clone", repo.URL}
 	if repo.IncludesRepoDir {
 		args = append(args, repo.Path.String())
 	} else {

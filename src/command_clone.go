@@ -19,7 +19,7 @@ func Clone(spec, specified string, https bool) error {
 	if repo.IncludesRepoDir {
 		s = "as"
 	}
-	fmt.Printf("\nYour dotfiles was successfully cloned from '%s' %s '%s'\n", repo.Url, s, repo.Path.String())
+	fmt.Printf("\nYour dotfiles was successfully cloned from '%s' %s '%s'\n", repo.URL, s, repo.Path.String())
 
 	return nil
 }

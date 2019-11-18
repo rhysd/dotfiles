@@ -23,7 +23,7 @@ func absolutePathToRepo(repo string) (abspath.AbsPath, error) {
 	}
 
 	if s, err := os.Stat(p.String()); err != nil || !s.IsDir() {
-		return abspath.AbsPath{}, fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory.", p.String())
+		return abspath.AbsPath{}, fmt.Errorf("'%s' is not a directory. Please specify your dotfiles directory", p.String())
 	}
 
 	return p, nil

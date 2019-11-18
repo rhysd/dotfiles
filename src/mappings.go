@@ -20,24 +20,23 @@ type NothingLinkedError struct {
 func (err NothingLinkedError) Error() string {
 	if err.RepoPath == "" {
 		return "Nothing was linked."
-	} else {
-		return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it.", err.RepoPath)
 	}
+	return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it", err.RepoPath)
 }
 
-// A special platform name used commonly for Unix-like platform
-const PLATFORM_UNIX_LIKE = "unixlike"
+// UnixLikePlatformName is a special platform name used commonly for Unix-like platform
+const UnixLikePlatformName = "unixlike"
 
 type Mappings map[string]abspath.AbsPath
-type MappingsJson map[string]string
+type MappingsJSON map[string]string
 
-var DefaultMappings = map[string]MappingsJson{
-	"windows": MappingsJson{
+var DefaultMappings = map[string]MappingsJSON{
+	"windows": MappingsJSON{
 		".gvimrc": "~/vimfiles/gvimrc",
 		".vim":    "~/vimfiles",
 		".vimrc":  "~/vimfiles/vimrc",
 	},
-	PLATFORM_UNIX_LIKE: MappingsJson{
+	UnixLikePlatformName: MappingsJSON{
 		".agignore":      "~/.agignore",
 		".bash_login":    "~/.bash_login",
 		".bash_profile":  "~/.bash_profile",
@@ -83,21 +82,21 @@ var DefaultMappings = map[string]MappingsJson{
 		"init.el":        "~/.emacs.d/init.el",
 		"peco":           "~/.config/peco",
 	},
-	"linux": MappingsJson{
+	"linux": MappingsJSON{
 		".Xmodmap":    "~/.Xmodmap",
 		".Xresources": "~/.Xresources",
 		"Xmodmap":     "~/.Xmodmap",
 		"Xresources":  "~/.Xresources",
 		"rc.lua":      "~/.config/rc.lua",
 	},
-	"darwin": MappingsJson{
+	"darwin": MappingsJSON{
 		".htoprc": "~/.htoprc",
 		"htoprc":  "~/.htoprc",
 	},
 }
 
-func parseMappingsJson(file abspath.AbsPath) (MappingsJson, error) {
-	var m MappingsJson
+func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
+	var m MappingsJSON
 
 	bytes, err := ioutil.ReadFile(file.String())
 	if err != nil {
@@ -113,7 +112,7 @@ func parseMappingsJson(file abspath.AbsPath) (MappingsJson, error) {
 	return m, nil
 }
 
-func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
+func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 	if json == nil {
 		return nil, nil
 	}
@@ -139,7 +138,7 @@ func convertMappingsJsonToMappings(json MappingsJson) (Mappings, error) {
 }
 
 func mergeMappingsFromDefault(dist Mappings, platform string) error {
-	m, err := convertMappingsJsonToMappings(DefaultMappings[platform])
+	m, err := convertMappingsJSONToMappings(DefaultMappings[platform])
 	if err != nil {
 		return err
 	}
@@ -152,7 +151,7 @@ func mergeMappingsFromDefault(dist Mappings, platform string) error {
 }
 
 func mergeMappingsFromFile(dist Mappings, file abspath.AbsPath) error {
-	j, err := parseMappingsJson(file)
+	j, err := parseMappingsJSON(file)
 	if err != nil {
 		return err
 	}
@@ -160,7 +159,7 @@ func mergeMappingsFromFile(dist Mappings, file abspath.AbsPath) error {
 		return nil
 	}
 
-	m, err := convertMappingsJsonToMappings(j)
+	m, err := convertMappingsJSONToMappings(j)
 	if err != nil {
 		return err
 	}
@@ -180,7 +179,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	m := Mappings{}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromDefault(m, PLATFORM_UNIX_LIKE); err != nil {
+		if err := mergeMappingsFromDefault(m, UnixLikePlatformName); err != nil {
 			return nil, err
 		}
 	}
@@ -193,7 +192,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", PLATFORM_UNIX_LIKE))); err != nil {
+		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", UnixLikePlatformName))); err != nil {
 			return nil, err
 		}
 	}
@@ -255,7 +254,7 @@ func (mappings Mappings) CreateAllLinks(dry bool) error {
 			return err
 		}
 		if linked {
-			count += 1
+			count++
 		}
 	}
 
@@ -275,7 +274,7 @@ func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 				return err
 			}
 			if linked {
-				count += 1
+				count++
 			}
 		}
 	}
@@ -334,7 +333,7 @@ func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 			return err
 		}
 		if unlinked {
-			count += 1
+			count++
 		}
 	}
 

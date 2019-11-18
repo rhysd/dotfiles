@@ -70,7 +70,7 @@ func getcwd() abspath.AbsPath {
 	return cwd
 }
 
-func createTestJson(fname, contents string) {
+func createTestJSON(fname, contents string) {
 	if err := os.MkdirAll("_test_config", os.ModeDir|os.ModePerm); err != nil {
 		panic(err)
 	}
@@ -90,7 +90,7 @@ func createTestJson(fname, contents string) {
 }
 
 func TestGetMappingsMappingsJson(t *testing.T) {
-	createTestJson("mappings.json", `
+	createTestJSON("mappings.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/override/path/vimrc",
@@ -128,7 +128,7 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 }
 
 func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
-	createTestJson("mappings_darwin.json", `
+	createTestJSON("mappings_darwin.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/override/path/vimrc"
@@ -167,13 +167,13 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 }
 
 func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
-	createTestJson("mappings_unixlike.json", `
+	createTestJSON("mappings_unixlike.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/hidden/path/vimrc"
 	}
 	`)
-	createTestJson("mappings_darwin.json", `
+	createTestJSON("mappings_darwin.json", `
 	{
 		".vimrc": "/override/path/vimrc"
 	}
@@ -211,7 +211,7 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 }
 
 func TestGetMappingsInvalidJson(t *testing.T) {
-	createTestJson("mappings.json", `
+	createTestJSON("mappings.json", `
 	{
 		"some_file":
 	`)
@@ -228,7 +228,7 @@ func TestGetMappingsInvalidJson(t *testing.T) {
 }
 
 func TestGetMappingsEmptyKey(t *testing.T) {
-	createTestJson("mappings.json", `
+	createTestJSON("mappings.json", `
 	{
 		"": "/path/to/somewhere"
 	}
@@ -246,7 +246,7 @@ func TestGetMappingsEmptyKey(t *testing.T) {
 }
 
 func TestGetMappingsInvalidPathValue(t *testing.T) {
-	createTestJson("mappings.json", `
+	createTestJSON("mappings.json", `
 	{
 		"some_file": "relative-path"
 	}`)

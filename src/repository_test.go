@@ -75,8 +75,8 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())
 		}
-		if r.Url != expected {
-			t.Errorf("Expected %s for input %s, but actually %s", expected, input, r.Url)
+		if r.URL != expected {
+			t.Errorf("Expected %s for input %s, but actually %s", expected, input, r.URL)
 		}
 	}
 }
@@ -94,8 +94,8 @@ func TestNewRepositoryWithHttps(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error for full path: %s: %s", input, err.Error())
 		}
-		if r.Url != expected {
-			t.Errorf("Expected %s for input %s, but actually %s", expected, input, r.Url)
+		if r.URL != expected {
+			t.Errorf("Expected %s for input %s, but actually %s", expected, input, r.URL)
 		}
 	}
 }
@@ -158,7 +158,7 @@ func TestClone(t *testing.T) {
 	{
 		r, _ := NewRepository("rhysd/vim-rustpeg", "", false)
 		if err := r.Clone(); err != nil {
-			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
+			t.Fatalf("Error on cloning repository %s to current directory: %s", r.URL, err.Error())
 		}
 		defer os.RemoveAll("vim-rustpeg")
 		p := path.Join(getwd(), "vim-rustpeg") // Just a test repository
@@ -174,7 +174,7 @@ func TestClone(t *testing.T) {
 	{
 		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned", false)
 		if err := r.Clone(); err != nil {
-			t.Fatalf("Error on cloning repository %s to current directory: %s", r.Url, err.Error())
+			t.Fatalf("Error on cloning repository %s to current directory: %s", r.URL, err.Error())
 		}
 		p := path.Join(getwd(), "_test_cloned", "dotfiles") // Just a test repository
 		s, err := os.Stat(p)
