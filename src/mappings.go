@@ -27,8 +27,8 @@ func (err NothingLinkedError) Error() string {
 // UnixLikePlatformName is a special platform name used commonly for Unix-like platform
 const UnixLikePlatformName = "unixlike"
 
-type Mappings map[string]abspath.AbsPath
-type MappingsJSON map[string]string
+type Mappings map[string][]abspath.AbsPath
+type MappingsJSON map[string]interface{}
 
 var DefaultMappings = map[string]MappingsJSON{
 	"windows": MappingsJSON{
@@ -112,6 +112,13 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 	return m, nil
 }
 
+func expandPath(s string) (abspath.AbsPath, error) {
+	if s[0] != '~' && s[0] != '/' {
+		return abspath.AbsPath{}, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", s)
+	}
+	return abspath.ExpandFromSlash(s)
+}
+
 func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 	if json == nil {
 		return nil, nil
@@ -121,18 +128,33 @@ func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 		if k == "" {
 			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", v)
 		}
-		if v == "" {
-			// Note: Ignore if dist is specified 'null' in JSON
-			continue
+		switch v := v.(type) {
+		case string:
+			if v == "" {
+				// Note: Ignore if dist is specified 'null' in JSON
+				continue
+			}
+			p, err := expandPath(v)
+			if err != nil {
+				return nil, err
+			}
+			m[k] = []abspath.AbsPath{p}
+		case []interface{}:
+			m[k] = make([]abspath.AbsPath, 0, len(v))
+			for _, iface := range v {
+				s, ok := iface.(string)
+				if !ok {
+					return nil, fmt.Errorf("Type of value must be string or string[]: %v", v)
+				}
+				p, err := expandPath(s)
+				if err != nil {
+					return nil, err
+				}
+				m[k] = append(m[k], p)
+			}
+		default:
+			return nil, fmt.Errorf("Type of value must be string or string[]: %v", v)
 		}
-		if v[0] != '~' && v[0] != '/' {
-			return nil, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
-		}
-		p, err := abspath.ExpandFromSlash(v)
-		if err != nil {
-			return nil, err
-		}
-		m[k] = p
 	}
 	return m, nil
 }
@@ -248,13 +270,15 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 
 func (mappings Mappings) CreateAllLinks(dry bool) error {
 	count := 0
-	for from, to := range mappings {
-		linked, err := link(from, to, dry)
-		if err != nil {
-			return err
-		}
-		if linked {
-			count++
+	for from, tos := range mappings {
+		for _, to := range tos {
+			linked, err := link(from, to, dry)
+			if err != nil {
+				return err
+			}
+			if linked {
+				count++
+			}
 		}
 	}
 
@@ -268,13 +292,15 @@ func (mappings Mappings) CreateAllLinks(dry bool) error {
 func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	count := 0
 	for _, from := range specified {
-		if to, ok := mappings[from]; ok {
-			linked, err := link(from, to, dry)
-			if err != nil {
-				return err
-			}
-			if linked {
-				count++
+		if tos, ok := mappings[from]; ok {
+			for _, to := range tos {
+				linked, err := link(from, to, dry)
+				if err != nil {
+					return err
+				}
+				if linked {
+					count++
+				}
 			}
 		}
 	}
@@ -327,13 +353,15 @@ func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 
 func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	count := 0
-	for _, to := range mappings {
-		unlinked, err := mappings.unlink(repo, to)
-		if err != nil {
-			return err
-		}
-		if unlinked {
-			count++
+	for _, tos := range mappings {
+		for _, to := range tos {
+			unlinked, err := mappings.unlink(repo, to)
+			if err != nil {
+				return err
+			}
+			if unlinked {
+				count++
+			}
 		}
 	}
 
@@ -346,13 +374,15 @@ func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 
 func (mappings Mappings) ActualLinks(repo abspath.AbsPath) (map[string]string, error) {
 	ret := map[string]string{}
-	for _, to := range mappings {
-		s, err := getLinkSource(repo, to)
-		if err != nil {
-			return nil, err
-		}
-		if s != "" {
-			ret[s] = to.String()
+	for _, tos := range mappings {
+		for _, to := range tos {
+			s, err := getLinkSource(repo, to)
+			if err != nil {
+				return nil, err
+			}
+			if s != "" {
+				ret[s] = to.String()
+			}
 		}
 	}
 	return ret, nil
