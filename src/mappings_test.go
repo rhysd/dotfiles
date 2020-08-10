@@ -175,7 +175,7 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"].(string)[1:]) {
+	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
 		t.Errorf("Mapping should not be overridden by mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
@@ -219,7 +219,7 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"].(string)[1:]) {
+	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
 		t.Errorf("Mapping should not be overridden by mappings_unix.json or mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
@@ -583,5 +583,24 @@ func TestActualLinksNotDotfile(t *testing.T) {
 
 	if len(l) > 0 {
 		t.Fatalf("When a mapping is a hard link, it's not a dotfile and should not considered.  But actually links '%v' are detected", l)
+	}
+}
+
+func TestConvertMappingsJSONToMappings(t *testing.T) {
+	json := MappingsJSON{
+		"empty":     []string{},
+		"null_only": []string{""},
+	}
+	m, err := convertMappingsJSONToMappings(json)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m["empty"]) != 0 {
+		t.Fatalf("Converted mapping value for `empty` is wrong: '%v'", m["empty"])
+	}
+	// Expected value for `null_only` is also an empty slice,
+	// because the empty string is ignored when converting.
+	if len(m["null_only"]) != 0 {
+		t.Fatalf("Converted mapping value for `null_only` is wrong: '%v'", m["null_only"])
 	}
 }
