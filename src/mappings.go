@@ -153,7 +153,7 @@ func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 				m[k] = append(m[k], p)
 			}
 		default:
-			return nil, fmt.Errorf("Type of value must be string or string[]: %v", v)
+			return nil, fmt.Errorf("Value of mappings object must be string or string[]: %v", v)
 		}
 	}
 	return m, nil
