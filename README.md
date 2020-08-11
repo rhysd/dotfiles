@@ -128,6 +128,17 @@ Below is an example of `.dotfiles/mappings_darwin.json`.
 }
 ```
 
+Values of the mappings object are basically strings representing destination paths, but they also can be arrays of strings. In the case, multiple symbolic links will be created for the source file.
+
+For example, the following configuration will make two symbolic links `~/.vimrc` and `~/.config/nvim/init.vim` for `vimrc` source file.
+
+
+```json
+{
+  "vimrc": ["~/.vimrc", "~/.config/nvim/init.vim"]
+}
+```
+
 Real world example is [my dotfiles](https://github.com/rhysd/dogfiles/tree/master/.dotfiles).
 
 ## License
