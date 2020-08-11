@@ -27,76 +27,76 @@ func (err NothingLinkedError) Error() string {
 // UnixLikePlatformName is a special platform name used commonly for Unix-like platform
 const UnixLikePlatformName = "unixlike"
 
-type Mappings map[string]abspath.AbsPath
-type MappingsJSON map[string]string
+type Mappings map[string][]abspath.AbsPath
+type MappingsJSON map[string][]string
 
 var DefaultMappings = map[string]MappingsJSON{
 	"windows": MappingsJSON{
-		".gvimrc": "~/vimfiles/gvimrc",
-		".vim":    "~/vimfiles",
-		".vimrc":  "~/vimfiles/vimrc",
+		".gvimrc": []string{"~/vimfiles/gvimrc"},
+		".vim":    []string{"~/vimfiles"},
+		".vimrc":  []string{"~/vimfiles/vimrc"},
 	},
 	UnixLikePlatformName: MappingsJSON{
-		".agignore":      "~/.agignore",
-		".bash_login":    "~/.bash_login",
-		".bash_profile":  "~/.bash_profile",
-		".bashrc":        "~/.bashrc",
-		".emacs.d":       "~/.emacs.d",
-		".emacs.el":      "~/.emacs.d/init.el",
-		".eslintrc":      "~/.eslintrc",
-		".eslintrc.json": "~/.eslintrc.json",
-		".eslintrc.yml":  "~/.eslintrc.yml",
-		".gvimrc":        "~/.gvimrc",
-		".npmrc":         "~/.npmrc",
-		".profile":       "~/.profile",
-		".pryrc":         "~/.pryrc",
-		".pylintrc":      "~/.pylintrc",
-		".tmux.conf":     "~/.tmux.conf",
-		".vim":           "~/.vim",
-		".vimrc":         "~/.vimrc",
-		".zlogin":        "~/.zlogin",
-		".zprofile":      "~/.zprofile",
-		".zshenv":        "~/.zshenv",
-		".zshrc":         "~/.zshrc",
-		"agignore":       "~/.agignore",
-		"bash_login":     "~/.bash_login",
-		"bash_profile":   "~/.bash_profile",
-		"bashrc":         "~/.bashrc",
-		"emacs.d":        "~/.emacs.d",
-		"emacs.el":       "~/.emacs.d/init.el",
-		"eslintrc":       "~/.eslintrc",
-		"eslintrc.json":  "~/.eslintrc.json",
-		"eslintrc.yml":   "~/.eslintrc.yml",
-		"gvimrc":         "~/.gvimrc",
-		"npmrc":          "~/.npmrc",
-		"profile":        "~/.profile",
-		"pryrc":          "~/.pryrc",
-		"pylintrc":       "~/.pylintrc",
-		"tmux.conf":      "~/.tmux.conf",
-		"vim":            "~/.vim",
-		"vimrc":          "~/.vimrc",
-		"zlogin":         "~/.zlogin",
-		"zprofile":       "~/.zprofile",
-		"zshenv":         "~/.zshenv",
-		"zshrc":          "~/.zshrc",
-		"init.el":        "~/.emacs.d/init.el",
-		"peco":           "~/.config/peco",
+		".agignore":      []string{"~/.agignore"},
+		".bash_login":    []string{"~/.bash_login"},
+		".bash_profile":  []string{"~/.bash_profile"},
+		".bashrc":        []string{"~/.bashrc"},
+		".emacs.d":       []string{"~/.emacs.d"},
+		".emacs.el":      []string{"~/.emacs.d/init.el"},
+		".eslintrc":      []string{"~/.eslintrc"},
+		".eslintrc.json": []string{"~/.eslintrc.json"},
+		".eslintrc.yml":  []string{"~/.eslintrc.yml"},
+		".gvimrc":        []string{"~/.gvimrc"},
+		".npmrc":         []string{"~/.npmrc"},
+		".profile":       []string{"~/.profile"},
+		".pryrc":         []string{"~/.pryrc"},
+		".pylintrc":      []string{"~/.pylintrc"},
+		".tmux.conf":     []string{"~/.tmux.conf"},
+		".vim":           []string{"~/.vim"},
+		".vimrc":         []string{"~/.vimrc"},
+		".zlogin":        []string{"~/.zlogin"},
+		".zprofile":      []string{"~/.zprofile"},
+		".zshenv":        []string{"~/.zshenv"},
+		".zshrc":         []string{"~/.zshrc"},
+		"agignore":       []string{"~/.agignore"},
+		"bash_login":     []string{"~/.bash_login"},
+		"bash_profile":   []string{"~/.bash_profile"},
+		"bashrc":         []string{"~/.bashrc"},
+		"emacs.d":        []string{"~/.emacs.d"},
+		"emacs.el":       []string{"~/.emacs.d/init.el"},
+		"eslintrc":       []string{"~/.eslintrc"},
+		"eslintrc.json":  []string{"~/.eslintrc.json"},
+		"eslintrc.yml":   []string{"~/.eslintrc.yml"},
+		"gvimrc":         []string{"~/.gvimrc"},
+		"npmrc":          []string{"~/.npmrc"},
+		"profile":        []string{"~/.profile"},
+		"pryrc":          []string{"~/.pryrc"},
+		"pylintrc":       []string{"~/.pylintrc"},
+		"tmux.conf":      []string{"~/.tmux.conf"},
+		"vim":            []string{"~/.vim"},
+		"vimrc":          []string{"~/.vimrc"},
+		"zlogin":         []string{"~/.zlogin"},
+		"zprofile":       []string{"~/.zprofile"},
+		"zshenv":         []string{"~/.zshenv"},
+		"zshrc":          []string{"~/.zshrc"},
+		"init.el":        []string{"~/.emacs.d/init.el"},
+		"peco":           []string{"~/.config/peco"},
 	},
 	"linux": MappingsJSON{
-		".Xmodmap":    "~/.Xmodmap",
-		".Xresources": "~/.Xresources",
-		"Xmodmap":     "~/.Xmodmap",
-		"Xresources":  "~/.Xresources",
-		"rc.lua":      "~/.config/rc.lua",
+		".Xmodmap":    []string{"~/.Xmodmap"},
+		".Xresources": []string{"~/.Xresources"},
+		"Xmodmap":     []string{"~/.Xmodmap"},
+		"Xresources":  []string{"~/.Xresources"},
+		"rc.lua":      []string{"~/.config/rc.lua"},
 	},
 	"darwin": MappingsJSON{
-		".htoprc": "~/.htoprc",
-		"htoprc":  "~/.htoprc",
+		".htoprc": []string{"~/.htoprc"},
+		"htoprc":  []string{"~/.htoprc"},
 	},
 }
 
 func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
-	var m MappingsJSON
+	var m map[string]interface{}
 
 	bytes, err := ioutil.ReadFile(file.String())
 	if err != nil {
@@ -109,7 +109,25 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 		return nil, err
 	}
 
-	return m, nil
+	mappings := make(MappingsJSON, len(m))
+	for k, v := range m {
+		switch v := v.(type) {
+		case string:
+			mappings[k] = []string{v}
+		case []interface{}:
+			vs := make([]string, 0, len(v))
+			for _, iface := range v {
+				s, ok := iface.(string)
+				if !ok {
+					return nil, fmt.Errorf("Value of mappings object must be string or string[]: %v", v)
+				}
+				vs = append(vs, s)
+			}
+			mappings[k] = vs
+		}
+	}
+
+	return mappings, nil
 }
 
 func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
@@ -117,22 +135,25 @@ func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 		return nil, nil
 	}
 	m := make(Mappings, len(json))
-	for k, v := range json {
+	for k, vs := range json {
 		if k == "" {
-			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", v)
+			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", vs)
 		}
-		if v == "" {
-			// Note: Ignore if dist is specified 'null' in JSON
-			continue
+		ps := make([]abspath.AbsPath, 0, len(vs))
+		for _, v := range vs {
+			if v == "" {
+				continue
+			}
+			if v[0] != '~' && v[0] != '/' {
+				return nil, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
+			}
+			p, err := abspath.ExpandFromSlash(v)
+			if err != nil {
+				return nil, err
+			}
+			ps = append(ps, p)
 		}
-		if v[0] != '~' && v[0] != '/' {
-			return nil, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
-		}
-		p, err := abspath.ExpandFromSlash(v)
-		if err != nil {
-			return nil, err
-		}
-		m[k] = p
+		m[k] = ps
 	}
 	return m, nil
 }
@@ -248,13 +269,15 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 
 func (mappings Mappings) CreateAllLinks(dry bool) error {
 	count := 0
-	for from, to := range mappings {
-		linked, err := link(from, to, dry)
-		if err != nil {
-			return err
-		}
-		if linked {
-			count++
+	for from, tos := range mappings {
+		for _, to := range tos {
+			linked, err := link(from, to, dry)
+			if err != nil {
+				return err
+			}
+			if linked {
+				count++
+			}
 		}
 	}
 
@@ -268,13 +291,15 @@ func (mappings Mappings) CreateAllLinks(dry bool) error {
 func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	count := 0
 	for _, from := range specified {
-		if to, ok := mappings[from]; ok {
-			linked, err := link(from, to, dry)
-			if err != nil {
-				return err
-			}
-			if linked {
-				count++
+		if tos, ok := mappings[from]; ok {
+			for _, to := range tos {
+				linked, err := link(from, to, dry)
+				if err != nil {
+					return err
+				}
+				if linked {
+					count++
+				}
 			}
 		}
 	}
@@ -327,13 +352,15 @@ func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 
 func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	count := 0
-	for _, to := range mappings {
-		unlinked, err := mappings.unlink(repo, to)
-		if err != nil {
-			return err
-		}
-		if unlinked {
-			count++
+	for _, tos := range mappings {
+		for _, to := range tos {
+			unlinked, err := mappings.unlink(repo, to)
+			if err != nil {
+				return err
+			}
+			if unlinked {
+				count++
+			}
 		}
 	}
 
@@ -346,13 +373,15 @@ func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 
 func (mappings Mappings) ActualLinks(repo abspath.AbsPath) (map[string]string, error) {
 	ret := map[string]string{}
-	for _, to := range mappings {
-		s, err := getLinkSource(repo, to)
-		if err != nil {
-			return nil, err
-		}
-		if s != "" {
-			ret[s] = to.String()
+	for _, tos := range mappings {
+		for _, to := range tos {
+			s, err := getLinkSource(repo, to)
+			if err != nil {
+				return nil, err
+			}
+			if s != "" {
+				ret[s] = to.String()
+			}
 		}
 	}
 	return ret, nil

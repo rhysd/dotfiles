@@ -2,5 +2,7 @@ language: go
 os:
   - linux
   - osx
+env:
+  - GO111MODULE=on
 script:
   - bash ./scripts/travis.sh

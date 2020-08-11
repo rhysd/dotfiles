@@ -20,7 +20,7 @@ func TestGetMappingsConfigDirNotExist(t *testing.T) {
 	if len(m) == 0 {
 		t.Errorf("Mappings should not be empty. Default value is not set.")
 	}
-	if m[".vimrc"].String() == "" {
+	if len(m[".vimrc"]) == 0 {
 		t.Errorf("Any platform default value must have '.vimrc' mapping. %v", m)
 	}
 }
@@ -42,7 +42,7 @@ func TestGetMappingsConfigFileNotExist(t *testing.T) {
 	if len(m) == 0 {
 		t.Errorf("Mappings should not be empty. Default value is not set.")
 	}
-	if m[".vimrc"].String() == "" {
+	if len(m[".vimrc"]) == 0 {
 		t.Errorf("Any platform default value must have '.vimrc' mapping. %v", m)
 	}
 }
@@ -89,12 +89,20 @@ func createTestJSON(fname, contents string) {
 	}
 }
 
+func hasOnlyDestination(m Mappings, src string, dest string) bool {
+	if len(m[src]) != 1 {
+		return false
+	}
+	return m[src][0].String() == dest
+}
+
 func TestGetMappingsMappingsJson(t *testing.T) {
 	createTestJSON("mappings.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/override/path/vimrc",
-		".conf": "~/path/in/home"
+		".conf": "~/path/in/home",
+		"multi_dest": ["/dest1", "/dest2"]
 	}
 	`)
 	defer os.RemoveAll("_test_config")
@@ -108,22 +116,28 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "/path/to/some_file" {
+	if !hasOnlyDestination(m, "some_file", "/path/to/some_file") {
 		t.Errorf("Mapping value set in mappings.json is wrong: '%s'", m["some_file"])
 	}
-	if m[".vimrc"].String() != "/override/path/vimrc" {
+	if !hasOnlyDestination(m, ".vimrc", "/override/path/vimrc") {
 		t.Errorf("Mapping should be overridden but actually '%s'", m[".vimrc"])
+	}
+	if p := m["multi_dest"]; len(p) != 2 || p[0].String() != "/dest1" || p[1].String() != "/dest2" {
+		t.Errorf("Expected two mappings but got '%s'", p)
 	}
 
 	m, err = GetMappingsForPlatform("darwin", p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "/path/to/some_file" {
+	if !hasOnlyDestination(m, "some_file", "/path/to/some_file") {
 		t.Errorf("Mapping value set in mappings.json is wrong: '%s' in Darwin", m["some_file"])
 	}
-	if m[".vimrc"].String() != "/override/path/vimrc" {
+	if !hasOnlyDestination(m, ".vimrc", "/override/path/vimrc") {
 		t.Errorf("Mapping should be overridden but actually '%s' for Darwin platform", m[".vimrc"])
+	}
+	if p := m["multi_dest"]; len(p) != 2 || p[0].String() != "/dest1" || p[1].String() != "/dest2" {
+		t.Errorf("Expected two mappings but got '%s' in Darwin", p)
 	}
 }
 
@@ -145,10 +159,10 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "/path/to/some_file" {
+	if !hasOnlyDestination(m, "some_file", "/path/to/some_file") {
 		t.Errorf("Mapping value set in mappings_darwin.json is wrong: '%s' in Darwin", m["some_file"])
 	}
-	if m[".vimrc"].String() != "/override/path/vimrc" {
+	if !hasOnlyDestination(m, ".vimrc", "/override/path/vimrc") {
 		t.Errorf("Mapping should be overridden by mappings_darwin.json but actually '%s'", m[".vimrc"])
 	}
 
@@ -156,13 +170,13 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "" {
+	if len(m["some_file"]) != 0 {
 		t.Errorf("Different configuration must not be loaded but actually some_file was linked to '%s'", m["some_file"])
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"].String(), DefaultMappings["windows"][".vimrc"][1:]) {
-		t.Errorf("Mapping should not be overridden by mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"])
+	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
+		t.Errorf("Mapping should not be overridden by mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
 
@@ -189,10 +203,10 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "/path/to/some_file" {
+	if !hasOnlyDestination(m, "some_file", "/path/to/some_file") {
 		t.Errorf("Mapping value set in mappings_unixlike.json is wrong: '%s' in Darwin", m["some_file"])
 	}
-	if m[".vimrc"].String() != "/override/path/vimrc" {
+	if !hasOnlyDestination(m, ".vimrc", "/override/path/vimrc") {
 		t.Errorf("Mapping should be overridden by mappings_darwin.json but actually '%s'", m[".vimrc"])
 	}
 
@@ -200,13 +214,13 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m["some_file"].String() != "" {
+	if len(m["some_file"]) != 0 {
 		t.Errorf("Different configuration must not be loaded but actually some_file was linked to '%s'", m["some_file"])
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"].String(), DefaultMappings["windows"][".vimrc"][1:]) {
-		t.Errorf("Mapping should not be overridden by mappings_unix.json or mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"])
+	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
+		t.Errorf("Mapping should not be overridden by mappings_unix.json or mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
 
@@ -264,7 +278,7 @@ func TestGetMappingsInvalidPathValue(t *testing.T) {
 
 func mapping(k string, v string) Mappings {
 	m := make(Mappings, 1)
-	m[k] = getcwd().Join(v)
+	m[k] = []abspath.AbsPath{getcwd().Join(v)}
 	return m
 }
 
@@ -361,7 +375,7 @@ func TestLinkDirSymlink(t *testing.T) {
 
 func TestLinkSpecifiedMappingOnly(t *testing.T) {
 	m := mapping("._source.conf", "_dist.conf")
-	m["LICENSE.txt"] = getcwd().Join("_never_created.txt")
+	m["LICENSE.txt"] = []abspath.AbsPath{getcwd().Join("_never_created.txt")}
 	f := openFile("._source.conf")
 	defer func() {
 		f.Close()
@@ -418,8 +432,11 @@ func TestLinkSourceNotExist(t *testing.T) {
 	}
 }
 
-func TestLinkNullDist(t *testing.T) {
-	m := Mappings{"License.txt": abspath.AbsPath{}}
+func TestLinkNullDest(t *testing.T) {
+	m := Mappings{
+		"empty":     []abspath.AbsPath{},
+		"null_only": []abspath.AbsPath{abspath.AbsPath{}},
+	}
 	err := m.CreateAllLinks(false)
 	if err == nil {
 		t.Errorf("Nothing was linked but error did not occur")
@@ -566,5 +583,24 @@ func TestActualLinksNotDotfile(t *testing.T) {
 
 	if len(l) > 0 {
 		t.Fatalf("When a mapping is a hard link, it's not a dotfile and should not considered.  But actually links '%v' are detected", l)
+	}
+}
+
+func TestConvertMappingsJSONToMappings(t *testing.T) {
+	json := MappingsJSON{
+		"empty":     []string{},
+		"null_only": []string{""},
+	}
+	m, err := convertMappingsJSONToMappings(json)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m["empty"]) != 0 {
+		t.Fatalf("Converted mapping value for `empty` is wrong: '%v'", m["empty"])
+	}
+	// Expected value for `null_only` is also an empty slice,
+	// because the empty string is ignored when converting.
+	if len(m["null_only"]) != 0 {
+		t.Fatalf("Converted mapping value for `null_only` is wrong: '%v'", m["null_only"])
 	}
 }
