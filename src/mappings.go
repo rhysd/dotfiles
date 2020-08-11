@@ -272,7 +272,7 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 }
 
 func (maps Mappings) CreateAllLinks(dry bool) error {
-	count := 0
+	created := false
 	for from, tos := range maps {
 		for _, to := range tos {
 			linked, err := link(from, to, dry)
@@ -280,12 +280,12 @@ func (maps Mappings) CreateAllLinks(dry bool) error {
 				return err
 			}
 			if linked {
-				count++
+				created = true
 			}
 		}
 	}
 
-	if count == 0 {
+	if !created {
 		return &NothingLinkedError{}
 	}
 
@@ -293,7 +293,7 @@ func (maps Mappings) CreateAllLinks(dry bool) error {
 }
 
 func (maps Mappings) CreateSomeLinks(specified []string, dry bool) error {
-	count := 0
+	created := false
 	for _, from := range specified {
 		if tos, ok := maps[from]; ok {
 			for _, to := range tos {
@@ -302,13 +302,13 @@ func (maps Mappings) CreateSomeLinks(specified []string, dry bool) error {
 					return err
 				}
 				if linked {
-					count++
+					created = true
 				}
 			}
 		}
 	}
 
-	if count == 0 && specified != nil && len(specified) > 0 {
+	if !created && len(specified) > 0 {
 		return &NothingLinkedError{}
 	}
 
