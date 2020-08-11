@@ -95,6 +95,10 @@ var DefaultMappings = map[string]MappingsJSON{
 	},
 }
 
+type PathLink struct {
+	src, dst string
+}
+
 func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 	var m map[string]interface{}
 
@@ -109,11 +113,11 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 		return nil, err
 	}
 
-	mappings := make(MappingsJSON, len(m))
+	maps := make(MappingsJSON, len(m))
 	for k, v := range m {
 		switch v := v.(type) {
 		case string:
-			mappings[k] = []string{v}
+			maps[k] = []string{v}
 		case []interface{}:
 			vs := make([]string, 0, len(v))
 			for _, iface := range v {
@@ -123,11 +127,11 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 				}
 				vs = append(vs, s)
 			}
-			mappings[k] = vs
+			maps[k] = vs
 		}
 	}
 
-	return mappings, nil
+	return maps, nil
 }
 
 func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
@@ -267,9 +271,9 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 	return true, nil
 }
 
-func (mappings Mappings) CreateAllLinks(dry bool) error {
+func (maps Mappings) CreateAllLinks(dry bool) error {
 	count := 0
-	for from, tos := range mappings {
+	for from, tos := range maps {
 		for _, to := range tos {
 			linked, err := link(from, to, dry)
 			if err != nil {
@@ -288,10 +292,10 @@ func (mappings Mappings) CreateAllLinks(dry bool) error {
 	return nil
 }
 
-func (mappings Mappings) CreateSomeLinks(specified []string, dry bool) error {
+func (maps Mappings) CreateSomeLinks(specified []string, dry bool) error {
 	count := 0
 	for _, from := range specified {
-		if tos, ok := mappings[from]; ok {
+		if tos, ok := maps[from]; ok {
 			for _, to := range tos {
 				linked, err := link(from, to, dry)
 				if err != nil {
@@ -335,7 +339,7 @@ func getLinkSource(repo, to abspath.AbsPath) (string, error) {
 	return source, nil
 }
 
-func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
+func (maps Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 	source, err := getLinkSource(repo, to)
 	if source == "" || err != nil {
 		return false, err
@@ -350,11 +354,11 @@ func (mappings Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 	return true, nil
 }
 
-func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
+func (maps Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	count := 0
-	for _, tos := range mappings {
+	for _, tos := range maps {
 		for _, to := range tos {
-			unlinked, err := mappings.unlink(repo, to)
+			unlinked, err := maps.unlink(repo, to)
 			if err != nil {
 				return err
 			}
@@ -371,16 +375,16 @@ func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	return nil
 }
 
-func (mappings Mappings) ActualLinks(repo abspath.AbsPath) ([]struct{ src, dst string }, error) {
-	ret := make([]struct{ src, dst string }, 0, len(mappings))
-	for _, tos := range mappings {
+func (maps Mappings) ActualLinks(repo abspath.AbsPath) ([]PathLink, error) {
+	ret := make([]PathLink, 0, len(maps))
+	for _, tos := range maps {
 		for _, to := range tos {
 			s, err := getLinkSource(repo, to)
 			if err != nil {
 				return nil, err
 			}
 			if s != "" {
-				ret = append(ret, struct{ src, dst string }{s, to.String()})
+				ret = append(ret, PathLink{s, to.String()})
 			}
 		}
 	}
