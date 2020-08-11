@@ -557,14 +557,13 @@ func TestActualLinksLinkExists(t *testing.T) {
 		t.Fatalf("Only one mapping is intended to be added but actually %d mappings exist", len(l))
 	}
 
-	e, ok := l[cwd.Join("._source.conf").String()]
-	if !ok {
+	if l[0].src != cwd.Join("._source.conf").String() {
 		t.Fatalf("._source.conf in current directory must be a source of symlink but actually not: '%v'", l)
 	}
 
 	expected := cwd.Join("._dist.conf").String()
-	if e != expected {
-		t.Fatalf("'%s' is expected as a dist of symlink, but actually '%s'", expected, e)
+	if l[0].dst != expected {
+		t.Fatalf("'%s' is expected as a dist of symlink, but actually '%s'", expected, l[0].dst)
 	}
 }
 
@@ -583,6 +582,34 @@ func TestActualLinksNotDotfile(t *testing.T) {
 
 	if len(l) > 0 {
 		t.Fatalf("When a mapping is a hard link, it's not a dotfile and should not considered.  But actually links '%v' are detected", l)
+	}
+}
+
+func TestActualLinksTwoDestsFromOneSource(t *testing.T) {
+	openFile("._source.conf").Close()
+	defer os.Remove("._source.conf")
+	createSymlink("._source.conf", "._dest1.conf")
+	defer os.Remove("._dest1.conf")
+	createSymlink("._source.conf", "._dest2.conf")
+	defer os.Remove("._dest2.conf")
+	cwd := getcwd()
+	m := Mappings{
+		"._source.conf": []abspath.AbsPath{getcwd().Join("._dest1.conf"), getcwd().Join("._dest2.conf")},
+	}
+
+	links, err := m.ActualLinks(cwd)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(links) != 2 {
+		t.Fatalf("Two mappings are intended to be added but actually %d mappings exist", len(links))
+	}
+	if l := links[0]; l.src != cwd.Join("._source.conf").String() || l.dst != cwd.Join("._dest1.conf").String() {
+		t.Fatalf("Expected link src=_source.conf dst=_dest1.conf but got '%+v'", l)
+	}
+	if l := links[1]; l.src != cwd.Join("._source.conf").String() || l.dst != cwd.Join("._dest2.conf").String() {
+		t.Fatalf("Expected link src=_source.conf dst=_dest2.conf but got '%+v'", l)
 	}
 }
 

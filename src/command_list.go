@@ -18,8 +18,8 @@ func List(specified string) error {
 		return err
 	}
 
-	for source, dist := range links {
-		fmt.Printf("'%s' -> '%s'\n", source, dist)
+	for _, l := range links {
+		fmt.Printf("'%s' -> '%s'\n", l.src, l.dst)
 	}
 
 	if len(links) == 0 {

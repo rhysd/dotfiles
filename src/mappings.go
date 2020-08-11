@@ -371,8 +371,8 @@ func (mappings Mappings) UnlinkAll(repo abspath.AbsPath) error {
 	return nil
 }
 
-func (mappings Mappings) ActualLinks(repo abspath.AbsPath) (map[string]string, error) {
-	ret := map[string]string{}
+func (mappings Mappings) ActualLinks(repo abspath.AbsPath) ([]struct{ src, dst string }, error) {
+	ret := make([]struct{ src, dst string }, 0, len(mappings))
 	for _, tos := range mappings {
 		for _, to := range tos {
 			s, err := getLinkSource(repo, to)
@@ -380,7 +380,7 @@ func (mappings Mappings) ActualLinks(repo abspath.AbsPath) (map[string]string, e
 				return nil, err
 			}
 			if s != "" {
-				ret[s] = to.String()
+				ret = append(ret, struct{ src, dst string }{s, to.String()})
 			}
 		}
 	}
