@@ -11,7 +11,7 @@ func Link(repoInput string, specified []string, dry bool) error {
 		return err
 	}
 
-	if specified == nil || len(specified) == 0 {
+	if len(specified) == 0 {
 		err = m.CreateAllLinks(dry)
 		if e, ok := err.(*NothingLinkedError); ok {
 			e.RepoPath = repo.String()
