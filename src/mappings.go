@@ -376,7 +376,7 @@ func (maps Mappings) UnlinkAll(repo abspath.AbsPath) error {
 }
 
 func (maps Mappings) ActualLinks(repo abspath.AbsPath) ([]PathLink, error) {
-	m := map[PathLink]bool{}
+	m := map[PathLink]struct{}{}
 	for _, tos := range maps {
 		for _, to := range tos {
 			s, err := getLinkSource(repo, to)
@@ -384,7 +384,7 @@ func (maps Mappings) ActualLinks(repo abspath.AbsPath) ([]PathLink, error) {
 				return nil, err
 			}
 			if s != "" {
-				m[PathLink{s, to.String()}] = true
+				m[PathLink{s, to.String()}] = struct{}{}
 			}
 		}
 	}
