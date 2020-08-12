@@ -376,6 +376,10 @@ func (maps Mappings) UnlinkAll(repo abspath.AbsPath) error {
 }
 
 func (maps Mappings) ActualLinks(repo abspath.AbsPath) ([]PathLink, error) {
+	// Avoid duplicate of destination by using map. For example, when following mappings exist:
+	//   my_vimrc -> ~/.vimrc (from user config)
+	//   .vimrc -> ~/.vimrc (from default config)
+	// It might lists up duplicate links. (#9)
 	m := map[PathLink]struct{}{}
 	for _, tos := range maps {
 		for _, to := range tos {
@@ -388,9 +392,11 @@ func (maps Mappings) ActualLinks(repo abspath.AbsPath) ([]PathLink, error) {
 			}
 		}
 	}
+
 	ret := make([]PathLink, 0, len(m))
 	for l := range m {
 		ret = append(ret, l)
 	}
+
 	return ret, nil
 }
