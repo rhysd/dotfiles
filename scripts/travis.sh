@@ -15,9 +15,6 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew upgrade go
     set -e
     go get -t -d -v ./...
-    set +e
-    go test ./
-    set -e
     go test -v ./src/
 else
     go get github.com/axw/gocov/gocov
@@ -25,9 +22,6 @@ else
     go get golang.org/x/tools/cmd/cover
     go get -t -d -v ./...
     go vet
-    set +e
-    go test ./
-    set -e
     cd src/ && go vet && cd -
     go test -v -coverprofile=coverage.out ./src/
     if [[ "$COVERALLS_TOKEN" != "" ]]; then
