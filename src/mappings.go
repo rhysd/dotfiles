@@ -355,7 +355,7 @@ func (maps Mappings) unlink(repo, to abspath.AbsPath) (bool, error) {
 }
 
 func (maps Mappings) UnlinkAll(repo abspath.AbsPath) error {
-	count := 0
+	removed := false
 	for _, tos := range maps {
 		for _, to := range tos {
 			unlinked, err := maps.unlink(repo, to)
@@ -363,12 +363,12 @@ func (maps Mappings) UnlinkAll(repo abspath.AbsPath) error {
 				return err
 			}
 			if unlinked {
-				count++
+				removed = true
 			}
 		}
 	}
 
-	if count == 0 {
+	if !removed {
 		fmt.Printf("No symlink was removed (dotfiles: '%s').\n", repo.String())
 	}
 
