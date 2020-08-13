@@ -15,6 +15,7 @@ type Repository struct {
 	URL             string
 	Path            abspath.AbsPath
 	IncludesRepoDir bool
+	Git             string
 }
 
 func pathToCloneRepo(specified string) (abspath.AbsPath, bool, error) {
@@ -78,7 +79,7 @@ func NewRepository(spec, specified string, https bool) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Repository{spec, p, b}, nil
+	return &Repository{spec, p, b, os.Getenv("DOTFILES_GIT_COMMAND")}, nil
 }
 
 func (repo *Repository) Clone() error {
@@ -98,7 +99,12 @@ func (repo *Repository) Clone() error {
 		}
 	}
 
-	cmd := exec.Command("git", args...)
+	exe := repo.Git
+	if exe == "" {
+		exe = "git"
+	}
+
+	cmd := exec.Command(exe, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
