@@ -615,7 +615,18 @@ func TestActualLinksTwoDestsFromOneSource(t *testing.T) {
 	}
 
 	src := cwd.Join("._source.conf").String()
-	for i, c := range []string{"._dest1.conf", "._dest2.conf"} {
+	expected := []string{"._dest1.conf", "._dest2.conf"}
+
+	// `links` is generated from map. Order of elements in map is randomized. Adjust order of
+	// `expected` here
+	if strings.HasSuffix(links[0].dst, "._dest2.conf") {
+		// Swap order of `expected`
+		tmp := expected[0]
+		expected[0] = expected[1]
+		expected[1] = tmp
+	}
+
+	for i, c := range expected {
 		l := links[i]
 		if l.src != src {
 			t.Fatalf("Wanted %+v but got %+v for source (index=%d)", src, l.src, i)
