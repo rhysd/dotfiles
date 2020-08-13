@@ -149,15 +149,30 @@ func TestNewRepositoryWithInvalidEnv(t *testing.T) {
 	}
 }
 
-func TestClone(t *testing.T) {
+func TestCloneDummyCommand(t *testing.T) {
+	saved := os.Getenv("DOTFILES_GIT_COMMAND")
+	defer os.Setenv("DOTFILES_GIT_COMMAND", saved)
+	if err := os.Setenv("DOTFILES_GIT_COMMAND", "true"); err != nil {
+		panic(err)
+	}
+
+	r, _ := NewRepository("rhysd/vim-rustpeg", "", false)
+	if err := r.Clone(); err != nil {
+		t.Fatalf("Error on cloning repository %s to current directory: %s", r.URL, err)
+	}
+}
+
+func TestCloneError(t *testing.T) {
+	r, _ := NewRepository("rhysd/repository-does-not-exist", "", false)
+	if err := r.Clone(); err == nil {
+		t.Fatalf("Error did not occur")
+	}
+}
+
+func TestCloneRepo(t *testing.T) {
 	if os.Getenv("GITHUB_ACTIONS") != "" {
 		t.Skip("Skip test for cloning repository on GitHub Actions")
 	}
-
-	if err := os.MkdirAll("_test_cloned", os.ModeDir|os.ModePerm); err != nil {
-		panic(err.Error())
-	}
-	defer os.RemoveAll("_test_cloned")
 
 	{
 		r, _ := NewRepository("rhysd/vim-rustpeg", "", false)
@@ -174,6 +189,11 @@ func TestClone(t *testing.T) {
 			t.Fatalf("Cloned repository is not a directory")
 		}
 	}
+
+	if err := os.MkdirAll("_test_cloned", os.ModeDir|os.ModePerm); err != nil {
+		panic(err.Error())
+	}
+	defer os.RemoveAll("_test_cloned")
 
 	{
 		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned", false)
