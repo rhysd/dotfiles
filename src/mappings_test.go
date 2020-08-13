@@ -16,23 +16,31 @@ func getcwd() abspath.AbsPath {
 	return cwd
 }
 
-func createTestJSON(fname, contents string) {
-	if err := os.MkdirAll("_test_config", os.ModeDir|os.ModePerm); err != nil {
+func createTestDir() string {
+	dir := "_test_config"
+	if err := os.MkdirAll(dir, os.ModeDir|os.ModePerm); err != nil {
 		panic(err)
 	}
+	return dir
+}
 
-	f, err := os.OpenFile(getcwd().Join("_test_config", fname).String(), os.O_CREATE|os.O_RDWR, 0644)
+func createTestJSON(fname, contents string) string {
+	dir := createTestDir()
+
+	f, err := os.OpenFile(getcwd().Join(dir, fname).String(), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		os.RemoveAll("_test_config")
+		os.RemoveAll(dir)
 		panic(err)
 	}
 	defer f.Close()
 
 	_, err = f.WriteString(contents)
 	if err != nil {
-		os.RemoveAll("_test_config")
+		os.RemoveAll(dir)
 		panic(err)
 	}
+
+	return dir
 }
 
 func hasOnlyDestination(m Mappings, src string, dest string) bool {
@@ -102,12 +110,10 @@ func TestGetMappingsConfigDirNotExist(t *testing.T) {
 }
 
 func TestGetMappingsConfigFileNotExist(t *testing.T) {
-	if err := os.MkdirAll("_test_config", os.ModeDir|os.ModePerm); err != nil {
-		panic(err)
-	}
-	defer os.Remove("_test_config")
+	testDir := createTestDir()
+	defer os.Remove(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -139,7 +145,7 @@ func TestGetMappingsUnknownPlatform(t *testing.T) {
 }
 
 func TestGetMappingsMappingsJson(t *testing.T) {
-	createTestJSON("mappings.json", `
+	testDir := createTestJSON("mappings.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/override/path/vimrc",
@@ -147,9 +153,9 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 		"multi_dest": ["/dest1", "/dest2"]
 	}
 	`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -157,15 +163,6 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 	m, err := GetMappingsForPlatform("unknown", p)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if !hasOnlyDestination(m, "some_file", "/path/to/some_file") {
-		t.Errorf("Mapping value set in mappings.json is wrong: '%s'", m["some_file"])
-	}
-	if !hasOnlyDestination(m, ".vimrc", "/override/path/vimrc") {
-		t.Errorf("Mapping should be overridden but actually '%s'", m[".vimrc"])
-	}
-	if p := m["multi_dest"]; len(p) != 2 || p[0].String() != "/dest1" || p[1].String() != "/dest2" {
-		t.Errorf("Expected two mappings but got '%s'", p)
 	}
 
 	m, err = GetMappingsForPlatform("darwin", p)
@@ -184,15 +181,15 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 }
 
 func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
-	createTestJSON("mappings_darwin.json", `
+	testDir := createTestJSON("mappings_darwin.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/override/path/vimrc"
 	}
 	`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -223,7 +220,7 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 }
 
 func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
-	createTestJSON("mappings_unixlike.json", `
+	testDir := createTestJSON("mappings_unixlike.json", `
 	{
 		"some_file": "/path/to/some_file",
 		".vimrc": "/hidden/path/vimrc"
@@ -234,9 +231,9 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 		".vimrc": "/override/path/vimrc"
 	}
 	`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -267,13 +264,13 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 }
 
 func TestGetMappingsInvalidJson(t *testing.T) {
-	createTestJSON("mappings.json", `
+	testDir := createTestJSON("mappings.json", `
 	{
 		"some_file":
 	`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -284,14 +281,14 @@ func TestGetMappingsInvalidJson(t *testing.T) {
 }
 
 func TestGetMappingsEmptyKey(t *testing.T) {
-	createTestJSON("mappings.json", `
+	testDir := createTestJSON("mappings.json", `
 	{
 		"": "/path/to/somewhere"
 	}
 	`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -302,13 +299,13 @@ func TestGetMappingsEmptyKey(t *testing.T) {
 }
 
 func TestGetMappingsInvalidPathValue(t *testing.T) {
-	createTestJSON("mappings.json", `
+	testDir := createTestJSON("mappings.json", `
 	{
 		"some_file": "relative-path"
 	}`)
-	defer os.RemoveAll("_test_config")
+	defer os.RemoveAll(testDir)
 
-	p, err := abspath.ExpandFrom("_test_config")
+	p, err := abspath.ExpandFrom(testDir)
 	if err != nil {
 		panic(err)
 	}
@@ -474,7 +471,7 @@ func TestLinkDryRun(t *testing.T) {
 	}
 
 	if isSymlinkTo("_test.conf", "._test_source.conf") {
-		t.Fatalf("Symbolic link not found")
+		t.Fatalf("Symbolic link should not be found")
 	}
 }
 
@@ -527,6 +524,8 @@ func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
 	defer os.Remove("_outside.conf")
 
 	createSymlink("_outside.conf", "_test.conf")
+	defer os.Remove("_test.conf")
+
 	m := mapping("_another_test.conf", "_test.conf")
 	if err := m.UnlinkAll(dir); err != nil {
 		t.Error(err)
@@ -535,8 +534,6 @@ func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {
 	if _, err := os.Lstat(getcwd().Join("_test.conf").String()); err != nil {
 		t.Fatalf("When target is already linked to outside dotfiles, error should not occur: %s", err.Error())
 	}
-
-	os.Remove("_test.conf")
 }
 
 func TestActualLinksEmpty(t *testing.T) {
@@ -615,11 +612,17 @@ func TestActualLinksTwoDestsFromOneSource(t *testing.T) {
 	if len(links) != 2 {
 		t.Fatalf("Two mappings are intended to be added but actually %d mappings exist", len(links))
 	}
-	if l := links[0]; l.src != cwd.Join("._source.conf").String() || l.dst != cwd.Join("._dest1.conf").String() {
-		t.Fatalf("Expected link src=_source.conf dst=_dest1.conf but got '%+v'", l)
-	}
-	if l := links[1]; l.src != cwd.Join("._source.conf").String() || l.dst != cwd.Join("._dest2.conf").String() {
-		t.Fatalf("Expected link src=_source.conf dst=_dest2.conf but got '%+v'", l)
+
+	src := cwd.Join("._source.conf").String()
+	for i, c := range []string{"._dest1.conf", "._dest2.conf"} {
+		l := links[i]
+		if l.src != src {
+			t.Fatalf("Wanted %+v but got %+v for source (index=%d)", src, l.src, i)
+		}
+		dst := cwd.Join(c).String()
+		if l.dst != dst {
+			t.Fatalf("Wanted %+v but got %+v for source (index=%d)", dst, l.dst, i)
+		}
 	}
 }
 
