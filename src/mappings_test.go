@@ -8,6 +8,82 @@ import (
 	"github.com/rhysd/abspath"
 )
 
+func getcwd() abspath.AbsPath {
+	cwd, err := abspath.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return cwd
+}
+
+func createTestJSON(fname, contents string) {
+	if err := os.MkdirAll("_test_config", os.ModeDir|os.ModePerm); err != nil {
+		panic(err)
+	}
+
+	f, err := os.OpenFile(getcwd().Join("_test_config", fname).String(), os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		os.RemoveAll("_test_config")
+		panic(err)
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(contents)
+	if err != nil {
+		os.RemoveAll("_test_config")
+		panic(err)
+	}
+}
+
+func hasOnlyDestination(m Mappings, src string, dest string) bool {
+	if len(m[src]) != 1 {
+		return false
+	}
+	return m[src][0].String() == dest
+}
+
+func mapping(k string, v string) Mappings {
+	m := make(Mappings, 1)
+	m[k] = []abspath.AbsPath{getcwd().Join(v)}
+	return m
+}
+
+func openFile(n string) *os.File {
+	f, err := os.OpenFile(getcwd().Join(n).String(), os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		panic(err)
+	}
+	_, err = f.WriteString("this file is for test")
+	if err != nil {
+		panic(err)
+	}
+	return f
+}
+
+func isSymlinkTo(n, d string) bool {
+	cwd := getcwd()
+	source := cwd.Join(n).String()
+	s, err := os.Lstat(source)
+	if err != nil {
+		return false
+	}
+	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
+		return false
+	}
+	dist, err := os.Readlink(source)
+	if err != nil {
+		panic(err)
+	}
+	return dist == cwd.Join(d).String()
+}
+
+func createSymlink(from, to string) {
+	cwd := getcwd()
+	if err := os.Symlink(cwd.Join(from).String(), cwd.Join(to).String()); err != nil {
+		panic(err)
+	}
+}
+
 func TestGetMappingsConfigDirNotExist(t *testing.T) {
 	p, err := abspath.ExpandFrom("unknown_directory")
 	if err != nil {
@@ -60,40 +136,6 @@ func TestGetMappingsUnknownPlatform(t *testing.T) {
 	if len(m) != 0 {
 		t.Fatalf("Unknown mappings for unknown platform %v", m)
 	}
-}
-
-func getcwd() abspath.AbsPath {
-	cwd, err := abspath.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	return cwd
-}
-
-func createTestJSON(fname, contents string) {
-	if err := os.MkdirAll("_test_config", os.ModeDir|os.ModePerm); err != nil {
-		panic(err)
-	}
-
-	f, err := os.OpenFile(getcwd().Join("_test_config", fname).String(), os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		os.RemoveAll("_test_config")
-		panic(err)
-	}
-	defer f.Close()
-
-	_, err = f.WriteString(contents)
-	if err != nil {
-		os.RemoveAll("_test_config")
-		panic(err)
-	}
-}
-
-func hasOnlyDestination(m Mappings, src string, dest string) bool {
-	if len(m[src]) != 1 {
-		return false
-	}
-	return m[src][0].String() == dest
 }
 
 func TestGetMappingsMappingsJson(t *testing.T) {
@@ -276,41 +318,6 @@ func TestGetMappingsInvalidPathValue(t *testing.T) {
 	}
 }
 
-func mapping(k string, v string) Mappings {
-	m := make(Mappings, 1)
-	m[k] = []abspath.AbsPath{getcwd().Join(v)}
-	return m
-}
-
-func openFile(n string) *os.File {
-	f, err := os.OpenFile(getcwd().Join(n).String(), os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		panic(err)
-	}
-	_, err = f.WriteString("this file is for test")
-	if err != nil {
-		panic(err)
-	}
-	return f
-}
-
-func isSymlinkTo(n, d string) bool {
-	cwd := getcwd()
-	source := cwd.Join(n).String()
-	s, err := os.Lstat(source)
-	if err != nil {
-		return false
-	}
-	if s.Mode()&os.ModeSymlink != os.ModeSymlink {
-		return false
-	}
-	dist, err := os.Readlink(source)
-	if err != nil {
-		panic(err)
-	}
-	return dist == cwd.Join(d).String()
-}
-
 func TestLinkNormalFile(t *testing.T) {
 	cwd := getcwd()
 	m := mapping("._test_source.conf", "_test.conf")
@@ -468,13 +475,6 @@ func TestLinkDryRun(t *testing.T) {
 
 	if isSymlinkTo("_test.conf", "._test_source.conf") {
 		t.Fatalf("Symbolic link not found")
-	}
-}
-
-func createSymlink(from, to string) {
-	cwd := getcwd()
-	if err := os.Symlink(cwd.Join(from).String(), cwd.Join(to).String()); err != nil {
-		panic(err)
 	}
 }
 
