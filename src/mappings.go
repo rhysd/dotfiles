@@ -237,14 +237,8 @@ func fileExists(file string) bool {
 	return err == nil && !s.IsDir()
 }
 
-func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return false, err
-	}
-
-	p := filepath.Join(cwd, from)
-	if _, err := os.Stat(p); err != nil {
+func link(from, to abspath.AbsPath, dry bool) (bool, error) {
+	if _, err := os.Stat(from.String()); err != nil {
 		return false, nil
 	}
 
@@ -264,16 +258,17 @@ func link(from string, to abspath.AbsPath, dry bool) (bool, error) {
 		return true, nil
 	}
 
-	if err := os.Symlink(p, to.String()); err != nil {
+	if err := os.Symlink(from.String(), to.String()); err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
 
-func (maps Mappings) CreateAllLinks(dry bool) error {
+func (maps Mappings) CreateAllLinks(dir abspath.AbsPath, dry bool) error {
 	created := false
-	for from, tos := range maps {
+	for f, tos := range maps {
+		from := dir.Join(filepath.FromSlash(f))
 		for _, to := range tos {
 			linked, err := link(from, to, dry)
 			if err != nil {
@@ -292,10 +287,11 @@ func (maps Mappings) CreateAllLinks(dry bool) error {
 	return nil
 }
 
-func (maps Mappings) CreateSomeLinks(specified []string, dry bool) error {
+func (maps Mappings) CreateSomeLinks(specified []string, dir abspath.AbsPath, dry bool) error {
 	created := false
-	for _, from := range specified {
-		if tos, ok := maps[from]; ok {
+	for _, f := range specified {
+		if tos, ok := maps[f]; ok {
+			from := dir.Join(filepath.FromSlash(f))
 			for _, to := range tos {
 				linked, err := link(from, to, dry)
 				if err != nil {

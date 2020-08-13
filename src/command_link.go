@@ -12,12 +12,12 @@ func Link(repoInput string, specified []string, dry bool) error {
 	}
 
 	if len(specified) == 0 {
-		err = m.CreateAllLinks(dry)
+		err = m.CreateAllLinks(repo, dry)
 		if e, ok := err.(*NothingLinkedError); ok {
 			e.RepoPath = repo.String()
 		}
 		return err
 	}
 
-	return m.CreateSomeLinks(specified, dry)
+	return m.CreateSomeLinks(specified, repo, dry)
 }

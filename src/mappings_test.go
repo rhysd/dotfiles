@@ -312,6 +312,7 @@ func isSymlinkTo(n, d string) bool {
 }
 
 func TestLinkNormalFile(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("._test_source.conf", "_test.conf")
 	f := openFile("._test_source.conf")
 	defer func() {
@@ -319,7 +320,7 @@ func TestLinkNormalFile(t *testing.T) {
 		defer os.Remove("._test_source.conf")
 	}()
 
-	err := m.CreateAllLinks(false)
+	err := m.CreateAllLinks(cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -330,13 +331,14 @@ func TestLinkNormalFile(t *testing.T) {
 	defer os.Remove("_test.conf")
 
 	// Skipping already existing link
-	err = m.CreateAllLinks(false)
+	err = m.CreateAllLinks(cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestLinkToNonExistingDir(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("._source.conf", "_dist_dir/_dist.conf")
 	f := openFile("._source.conf")
 	defer func() {
@@ -344,7 +346,7 @@ func TestLinkToNonExistingDir(t *testing.T) {
 		defer os.Remove("._source.conf")
 	}()
 
-	err := m.CreateAllLinks(false)
+	err := m.CreateAllLinks(cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -356,13 +358,14 @@ func TestLinkToNonExistingDir(t *testing.T) {
 }
 
 func TestLinkDirSymlink(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("._source_dir", "_dist_dir")
 	if err := os.MkdirAll("._source_dir", os.ModeDir|os.ModePerm); err != nil {
 		panic(err)
 	}
 	defer os.Remove("._source_dir")
 
-	err := m.CreateAllLinks(false)
+	err := m.CreateAllLinks(cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -374,15 +377,18 @@ func TestLinkDirSymlink(t *testing.T) {
 }
 
 func TestLinkSpecifiedMappingOnly(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("._source.conf", "_dist.conf")
-	m["LICENSE.txt"] = []abspath.AbsPath{getcwd().Join("_never_created.txt")}
+	m["LICENSE.txt"] = []abspath.AbsPath{
+		getcwd().Join("_never_created.txt"),
+	}
 	f := openFile("._source.conf")
 	defer func() {
 		f.Close()
 		os.Remove("._source.conf")
 	}()
 
-	err := m.CreateSomeLinks([]string{"._source.conf"}, false)
+	err := m.CreateSomeLinks([]string{"._source.conf"}, cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -398,9 +404,10 @@ func TestLinkSpecifiedMappingOnly(t *testing.T) {
 }
 
 func TestLinkSpecifyingNonExistingFile(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("LICENSE.txt", "never_created.conf")
 
-	err := m.CreateSomeLinks([]string{}, false)
+	err := m.CreateSomeLinks([]string{}, cwd, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,7 +416,7 @@ func TestLinkSpecifyingNonExistingFile(t *testing.T) {
 		os.Remove("never_created.conf")
 	}
 
-	err = m.CreateSomeLinks([]string{"unknown_config.conf"}, false)
+	err = m.CreateSomeLinks([]string{"unknown_config.conf"}, cwd, false)
 	if _, ok := err.(*NothingLinkedError); !ok {
 		t.Fatal(err)
 	}
@@ -420,30 +427,33 @@ func TestLinkSpecifyingNonExistingFile(t *testing.T) {
 }
 
 func TestLinkSourceNotExist(t *testing.T) {
+	cwd := getcwd()
 	m := mapping(".unknown.conf", "never_created.conf")
-	err := m.CreateAllLinks(false)
+	err := m.CreateAllLinks(cwd, false)
 	if _, ok := err.(*NothingLinkedError); !ok {
 		t.Errorf("Not existing file must be ignored but actually error occurred: %s", err.Error())
 	}
 	m2 := mapping("unknown.conf", "never_created.conf")
-	err = m2.CreateSomeLinks([]string{"unknown.conf"}, false)
+	err = m2.CreateSomeLinks([]string{"unknown.conf"}, cwd, false)
 	if _, ok := err.(*NothingLinkedError); !ok {
 		t.Errorf("Not existing file must be ignored but actually error occurred: %s", err.Error())
 	}
 }
 
 func TestLinkNullDest(t *testing.T) {
+	cwd := getcwd()
 	m := Mappings{
 		"empty":     []abspath.AbsPath{},
 		"null_only": []abspath.AbsPath{abspath.AbsPath{}},
 	}
-	err := m.CreateAllLinks(false)
+	err := m.CreateAllLinks(cwd, false)
 	if err == nil {
 		t.Errorf("Nothing was linked but error did not occur")
 	}
 }
 
 func TestLinkDryRun(t *testing.T) {
+	cwd := getcwd()
 	m := mapping("._test_source.conf", "_test.conf")
 	f := openFile("._test_source.conf")
 	defer func() {
@@ -451,7 +461,7 @@ func TestLinkDryRun(t *testing.T) {
 		defer os.Remove("._test_source.conf")
 	}()
 
-	err := m.CreateAllLinks(true)
+	err := m.CreateAllLinks(cwd, true)
 	if err != nil {
 		t.Fatal(err)
 	}
