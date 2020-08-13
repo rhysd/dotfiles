@@ -175,7 +175,7 @@ func TestGetMappingsPlatformSpecificMappingsJson(t *testing.T) {
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
+	if !strings.HasSuffix(m[".vimrc"][0].String(), defaultMappings["windows"][".vimrc"][0][1:]) {
 		t.Errorf("Mapping should not be overridden by mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
@@ -219,7 +219,7 @@ func TestGetMappingsPlatformSpecificMappingsJsonUnix(t *testing.T) {
 	}
 
 	// Note: Consider '~' prefix in JSON path value
-	if !strings.HasSuffix(m[".vimrc"][0].String(), DefaultMappings["windows"][".vimrc"][0][1:]) {
+	if !strings.HasSuffix(m[".vimrc"][0].String(), defaultMappings["windows"][".vimrc"][0][1:]) {
 		t.Errorf("Mapping should not be overridden by mappings_unix.json or mappings_darwin.json on different platform (Windows) but actually '%s'", m[".vimrc"][0])
 	}
 }
@@ -614,7 +614,7 @@ func TestActualLinksTwoDestsFromOneSource(t *testing.T) {
 }
 
 func TestConvertMappingsJSONToMappings(t *testing.T) {
-	json := MappingsJSON{
+	json := mappingsJSON{
 		"empty":     []string{},
 		"null_only": []string{""},
 	}

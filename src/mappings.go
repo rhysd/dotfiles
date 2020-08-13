@@ -24,19 +24,19 @@ func (err NothingLinkedError) Error() string {
 	return fmt.Sprintf("Nothing was linked. '%s' was specified as dotfiles repository. Please check it", err.RepoPath)
 }
 
-// UnixLikePlatformName is a special platform name used commonly for Unix-like platform
-const UnixLikePlatformName = "unixlike"
+// unixLikePlatformName is a special platform name used commonly for Unix-like platform (Linux and macOS)
+const unixLikePlatformName = "unixlike"
 
 type Mappings map[string][]abspath.AbsPath
-type MappingsJSON map[string][]string
+type mappingsJSON map[string][]string
 
-var DefaultMappings = map[string]MappingsJSON{
-	"windows": MappingsJSON{
+var defaultMappings = map[string]mappingsJSON{
+	"windows": mappingsJSON{
 		".gvimrc": []string{"~/vimfiles/gvimrc"},
 		".vim":    []string{"~/vimfiles"},
 		".vimrc":  []string{"~/vimfiles/vimrc"},
 	},
-	UnixLikePlatformName: MappingsJSON{
+	unixLikePlatformName: mappingsJSON{
 		".agignore":      []string{"~/.agignore"},
 		".bash_login":    []string{"~/.bash_login"},
 		".bash_profile":  []string{"~/.bash_profile"},
@@ -82,14 +82,14 @@ var DefaultMappings = map[string]MappingsJSON{
 		"init.el":        []string{"~/.emacs.d/init.el"},
 		"peco":           []string{"~/.config/peco"},
 	},
-	"linux": MappingsJSON{
+	"linux": mappingsJSON{
 		".Xmodmap":    []string{"~/.Xmodmap"},
 		".Xresources": []string{"~/.Xresources"},
 		"Xmodmap":     []string{"~/.Xmodmap"},
 		"Xresources":  []string{"~/.Xresources"},
 		"rc.lua":      []string{"~/.config/rc.lua"},
 	},
-	"darwin": MappingsJSON{
+	"darwin": mappingsJSON{
 		".htoprc": []string{"~/.htoprc"},
 		"htoprc":  []string{"~/.htoprc"},
 	},
@@ -99,7 +99,7 @@ type PathLink struct {
 	src, dst string
 }
 
-func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
+func parseMappingsJSON(file abspath.AbsPath) (mappingsJSON, error) {
 	var m map[string]interface{}
 
 	bytes, err := ioutil.ReadFile(file.String())
@@ -113,7 +113,7 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 		return nil, err
 	}
 
-	maps := make(MappingsJSON, len(m))
+	maps := make(mappingsJSON, len(m))
 	for k, v := range m {
 		switch v := v.(type) {
 		case string:
@@ -134,7 +134,7 @@ func parseMappingsJSON(file abspath.AbsPath) (MappingsJSON, error) {
 	return maps, nil
 }
 
-func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
+func convertMappingsJSONToMappings(json mappingsJSON) (Mappings, error) {
 	if json == nil {
 		return nil, nil
 	}
@@ -163,7 +163,7 @@ func convertMappingsJSONToMappings(json MappingsJSON) (Mappings, error) {
 }
 
 func mergeMappingsFromDefault(dist Mappings, platform string) error {
-	m, err := convertMappingsJSONToMappings(DefaultMappings[platform])
+	m, err := convertMappingsJSONToMappings(defaultMappings[platform])
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	m := Mappings{}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromDefault(m, UnixLikePlatformName); err != nil {
+		if err := mergeMappingsFromDefault(m, unixLikePlatformName); err != nil {
 			return nil, err
 		}
 	}
@@ -217,7 +217,7 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 	}
 
 	if isUnixLikePlatform(platform) {
-		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", UnixLikePlatformName))); err != nil {
+		if err := mergeMappingsFromFile(m, parent.Join(fmt.Sprintf("mappings_%s.json", unixLikePlatformName))); err != nil {
 			return nil, err
 		}
 	}
