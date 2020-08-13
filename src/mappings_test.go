@@ -2,6 +2,7 @@ package dotfiles
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -642,5 +643,33 @@ func TestConvertMappingsJSONToMappings(t *testing.T) {
 	// because the empty string is ignored when converting.
 	if len(m["null_only"]) != 0 {
 		t.Fatalf("Converted mapping value for `null_only` is wrong: '%v'", m["null_only"])
+	}
+}
+
+func TestLinkOutsideDir(t *testing.T) {
+	testDir := createTestDir()
+	defer os.Remove(testDir)
+
+	cwd := getcwd()
+	f := "._test_source.conf"
+	m := mapping(f, "_test.conf")
+	p := filepath.Join(testDir, f)
+	openFile(p).Close()
+
+	d := cwd.Join(testDir)
+	err := m.CreateAllLinks(d, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove("_test.conf")
+
+	if !isSymlinkTo("_test.conf", p) {
+		t.Fatalf("Symbolic link not found")
+	}
+
+	// Skipping already existing link
+	err = m.CreateAllLinks(d, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
