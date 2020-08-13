@@ -150,6 +150,10 @@ func TestNewRepositoryWithInvalidEnv(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
+	if os.Getenv("GITHUB_ACTIONS") != "" {
+		t.Skip("Skip test for cloning repository on GitHub Actions")
+	}
+
 	if err := os.MkdirAll("_test_cloned", os.ModeDir|os.ModePerm); err != nil {
 		panic(err.Error())
 	}
