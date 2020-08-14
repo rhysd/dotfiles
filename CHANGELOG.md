@@ -1,3 +1,13 @@
+<a name="v0.2.2"></a>
+# [v0.2.2](https://github.com/rhysd/dotfiles/releases/tag/v0.2.2) - 14 Aug 2020
+
+- **Fix:** `dotfiles list` command did not show links correctly when one file was linked to multiple symlinks (#9)
+- **Fix:** `dotfiles link` command failed when linking files outside the dotfiles repository
+- **Dev:** Use GitHub Actions to run CI instead of Travis CI
+
+[Changes][v0.2.2]
+
+
 <a name="v0.2.1"></a>
 # [v0.2.1](https://github.com/rhysd/dotfiles/releases/tag/v0.2.1) - 11 Aug 2020
 
@@ -34,6 +44,7 @@ Please see README.md for the detail.
 [Changes][v0.1.0]
 
 
+[v0.2.2]: https://github.com/rhysd/dotfiles/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/rhysd/dotfiles/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/rhysd/dotfiles/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/rhysd/dotfiles/tree/v0.1.0
