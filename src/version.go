@@ -1,5 +1,5 @@
 package dotfiles
 
 func Version() string {
-	return "0.2.1"
+	return "0.2.2"
 }
