@@ -1,6 +1,6 @@
 `dotfiles` Command
 ==================
-[![CI](https://github.com/rhysd/dotfiles/workflows/CI/badge.svg?branch=ga&event=push)](https://github.com/rhysd/dotfiles/actions?query=workflow%3ACI)
+[![CI](https://github.com/rhysd/dotfiles/workflows/CI/badge.svg?branch=master&event=push)](https://github.com/rhysd/dotfiles/actions?query=workflow%3ACI)
 [![Coverage](https://codecov.io/gh/rhysd/dotfiles/branch/master/graph/badge.svg)](https://codecov.io/gh/rhysd/dotfiles)
 
 This repository provides `dotfiles` command to manage your [dotfiles](http://dotfiles.github.io/).  It manages your dotfiles repository and symbolic links to use the configurations.
