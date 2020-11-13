@@ -8,7 +8,7 @@ This repository provides `dotfiles` command to manage your [dotfiles](http://dot
 This command has below goals:
 
 - **One binary executable**: If you want to set configuration files in a remote server, all you have to do is sending a binary to the remote.
-- **Do one thing and to it well**: This command manages only a dotfiles repository.  Does not handle any other dependencies.  If you want full-setup including dependencies, you should use more suitable tool such as [Ansible](https://www.ansible.com/).  And then use `dotfiles` command from it.
+- **Do one thing and do it well**: This command manages only a dotfiles repository.  Does not handle any other dependencies.  If you want full-setup including dependencies, you should use more suitable tool such as [Ansible](https://www.ansible.com/).  And then use `dotfiles` command from it.
 - **Less dependency**: Only depends on `git` command.
 - **Sensible defaults**: Many sensible default symbolic link mappings are pre-defined.  You need not to specify the mappings for almost all configuration files.
 
