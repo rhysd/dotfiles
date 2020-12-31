@@ -33,7 +33,7 @@ var (
 	updateRepo = update.Arg("repo", "Path to your dotfiles repository.  If omitted, $DOTFILES_REPO_PATH is searched and fallback into the current directory.").String()
 
 	version    = cli.Command("version", "Show version")
-	updateSelf = cli.Command("selfupdate", "Show version")
+	updateSelf = cli.Command("selfupdate", "Update the executable binary by downloading the latest version from GitHub releases page.")
 )
 
 func unimplemented(cmd string) {
