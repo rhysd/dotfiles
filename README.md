@@ -17,7 +17,7 @@ Note: My dotfiles is [here](https://github.com/rhysd/dogfiles)
 
 ## Getting Started
 
-1. Download [a released executable](https://github.com/rhysd/dotfiles/releases) and put it in `$PATH` or `$ go get github.com/rhysd/dotfiles`.
+1. Download [a released executable](https://github.com/rhysd/dotfiles/releases) and put it in `$PATH` or `$ go install github.com/rhysd/dotfiles`.
 2. Change current directory to the directory you want to put a dotfiles repository.
 3. Clone your dotfiles repository with `$ dotfiles clone`.
 4. Enter the repository and run `$ dotfiles link --dry` to check which symlinks will be generated.
