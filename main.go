@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/blang/semver"
 	dotfiles "github.com/rhysd/dotfiles/src"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
