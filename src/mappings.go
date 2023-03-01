@@ -123,7 +123,7 @@ func parseMappingsJSON(file abspath.AbsPath) (mappingsJSON, error) {
 			for _, iface := range v {
 				s, ok := iface.(string)
 				if !ok {
-					return nil, fmt.Errorf("Value of mappings object must be string or string[]: %v", v)
+					return nil, fmt.Errorf("value of mappings object must be string or string[]: %v", v)
 				}
 				vs = append(vs, s)
 			}
@@ -141,7 +141,7 @@ func convertMappingsJSONToMappings(json mappingsJSON) (Mappings, error) {
 	m := make(Mappings, len(json))
 	for k, vs := range json {
 		if k == "" {
-			return nil, fmt.Errorf("Empty key cannot be included.  Note: Corresponding value is '%s'", vs)
+			return nil, fmt.Errorf("empty key cannot be included.  Note: Corresponding value is '%s'", vs)
 		}
 		ps := make([]abspath.AbsPath, 0, len(vs))
 		for _, v := range vs {
@@ -149,7 +149,7 @@ func convertMappingsJSONToMappings(json mappingsJSON) (Mappings, error) {
 				continue
 			}
 			if v[0] != '~' && v[0] != '/' {
-				return nil, fmt.Errorf("Value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
+				return nil, fmt.Errorf("value of mappings must be an absolute path like '/foo/.bar' or '~/.foo': %s", v)
 			}
 			p, err := abspath.ExpandFromSlash(v)
 			if err != nil {
@@ -230,11 +230,6 @@ func GetMappingsForPlatform(platform string, parent abspath.AbsPath) (Mappings, 
 
 func GetMappings(configDir abspath.AbsPath) (Mappings, error) {
 	return GetMappingsForPlatform(runtime.GOOS, configDir)
-}
-
-func fileExists(file string) bool {
-	s, err := os.Stat(file)
-	return err == nil && !s.IsDir()
 }
 
 func link(from, to abspath.AbsPath, dry bool) (bool, error) {

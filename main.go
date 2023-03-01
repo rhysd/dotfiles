@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/blang/semver"
-	"github.com/rhysd/dotfiles/src"
+	dotfiles "github.com/rhysd/dotfiles/src"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"os"
 )
 
 var (
@@ -35,10 +36,6 @@ var (
 	version    = cli.Command("version", "Show version")
 	updateSelf = cli.Command("selfupdate", "Update the executable binary by downloading the latest version from GitHub releases page.")
 )
-
-func unimplemented(cmd string) {
-	fmt.Fprintf(os.Stderr, "Command '%s' is not implemented yet!\n", cmd)
-}
 
 func exit(err error) {
 	if err != nil {

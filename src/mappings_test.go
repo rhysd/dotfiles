@@ -161,12 +161,12 @@ func TestGetMappingsMappingsJson(t *testing.T) {
 		panic(err)
 	}
 
-	m, err := GetMappingsForPlatform("unknown", p)
+	_, err = GetMappingsForPlatform("unknown", p)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	m, err = GetMappingsForPlatform("darwin", p)
+	m, err := GetMappingsForPlatform("darwin", p)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -511,6 +511,7 @@ func TestUnlinkAnotherFileAlreadyExist(t *testing.T) {
 }
 
 // e.g.
+//
 //	expected: dotfiles/vimrc -> ~/.vimrc
 //	actual: another_dir/vimrc -> ~/.vimrc
 func TestUnlinkDetectLinkToOutsideRepo(t *testing.T) {

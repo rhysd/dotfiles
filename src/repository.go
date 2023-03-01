@@ -25,14 +25,14 @@ func pathToCloneRepo(specified string) (abspath.AbsPath, bool, error) {
 			return abspath.AbsPath{}, false, err
 		}
 		if s, err := os.Stat(repo.String()); err != nil || !s.IsDir() {
-			return abspath.AbsPath{}, false, fmt.Errorf("Specified path does not exist or is a file: '%s'", repo.String())
+			return abspath.AbsPath{}, false, fmt.Errorf("specified path does not exist or is a file: '%s'", repo.String())
 		}
 		return repo, false, nil
 	}
 
 	if env := os.Getenv("DOTFILES_REPO_PATH"); env != "" {
 		if _, err := os.Stat(env); err == nil {
-			return abspath.AbsPath{}, false, fmt.Errorf("Repository directory is specified as '%s' with $DOTFILES_REPO_PATH but it already exists", env)
+			return abspath.AbsPath{}, false, fmt.Errorf("repository directory is specified as '%s' with $DOTFILES_REPO_PATH but it already exists", env)
 		}
 		repo, err := abspath.New(env)
 		if err != nil {
@@ -50,7 +50,7 @@ func pathToCloneRepo(specified string) (abspath.AbsPath, bool, error) {
 
 func NewRepository(spec, specified string, https bool) (*Repository, error) {
 	if spec == "" {
-		return nil, fmt.Errorf("Remote path to clone must not be empty")
+		return nil, fmt.Errorf("remote path to clone must not be empty")
 	}
 
 	if strings.HasPrefix(spec, "https://") {
