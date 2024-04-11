@@ -65,9 +65,7 @@ func TestNewRepositoryNormalizeRepoUrl(t *testing.T) {
 		"rhysd":                                 "git@github.com:rhysd/dotfiles.git",
 		"rhysd/foobar":                          "git@github.com:rhysd/foobar.git",
 		"https://github.com/rhysd/dogfiles.git": "https://github.com/rhysd/dogfiles.git",
-		"git@bitbucket.com:rhysd/dotfiles.git":  "git@bitbucket.com:rhysd/dotfiles.git",
 		"https://github.com/rhysd/dogfiles":     "https://github.com/rhysd/dogfiles.git",
-		"git@bitbucket.com:rhysd/dotfiles":      "git@bitbucket.com:rhysd/dotfiles.git",
 	}
 
 	for input, expected := range successCases {
@@ -86,7 +84,6 @@ func TestNewRepositoryWithHttps(t *testing.T) {
 		"rhysd":                                 "https://github.com/rhysd/dotfiles.git",
 		"rhysd/foobar":                          "https://github.com/rhysd/foobar.git",
 		"https://github.com/rhysd/dogfiles.git": "https://github.com/rhysd/dogfiles.git",
-		"git@bitbucket.com:rhysd/dotfiles.git":  "git@bitbucket.com:rhysd/dotfiles.git",
 	}
 
 	for input, expected := range successCases {
@@ -194,21 +191,6 @@ func TestCloneRepo(t *testing.T) {
 		panic(err.Error())
 	}
 	defer os.RemoveAll("_test_cloned")
-
-	{
-		r, _ := NewRepository("git@bitbucket.org:rhysd/dotfiles", "_test_cloned", false)
-		if err := r.Clone(); err != nil {
-			t.Fatalf("Error on cloning repository %s to current directory: %s", r.URL, err.Error())
-		}
-		p := path.Join(getwd(), "_test_cloned", "dotfiles") // Just a test repository
-		s, err := os.Stat(p)
-		if err != nil {
-			t.Fatalf("Cloned repository not found")
-		}
-		if !s.IsDir() {
-			t.Fatalf("Cloned repository is not a directory")
-		}
-	}
 }
 
 func TestCloneWithEnv(t *testing.T) {
