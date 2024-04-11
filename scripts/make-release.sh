@@ -2,11 +2,11 @@
 
 set -e
 
-gox -verbose -osarch="linux/amd64 linux/arm darwin/amd64 darwin/arm64 netbsd/amd64 openbsd/amd64 windows/amd64"
+gox -verbose -osarch="linux/amd64 linux/arm64 linux/arm darwin/amd64 darwin/arm64 netbsd/amd64 openbsd/amd64 windows/amd64"
 mkdir -p release
 mv dotfiles_* release/
 cd release
-for bin in `ls`; do
+for bin in dotfiles_*; do
     if [[ "$bin" == *windows* ]]; then
         command="dotfiles.exe"
     else
